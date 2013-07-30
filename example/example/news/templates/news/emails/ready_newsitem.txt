@@ -1,0 +1,14 @@
+{% extends 'emails/base.txt' %}
+
+{% load i18n %}
+
+{% block html_begin %}{% endblock html_begin %}
+
+{% block email_content %}
+    {% blocktrans with date_submitted as date_submitted and url as url and from_name as from_name and message as message %}
+        A News Item has been marked as `ready for review` by {{ from_name }} on {{ date_submitted }}.
+        Click here http://{{ domain }}{{ url }} to see it.
+    {% endblocktrans %}
+{% endblock email_content %}
+
+{% block html_end %}{% endblock html_end %}

@@ -1,0 +1,21 @@
+{% load i18n %}
+========================================
+{{ site_name }}
+========================================
+
+{% trans "Subject" %}: {{ emailsubject }}
+
+{% block header %}
+  {% blocktrans %}Dear {{ full_name }},{% endblocktrans %}
+{% endblock header %}
+
+{% block email_content %}{% endblock email_content %}
+
+{% block footer %}
+{% trans "Best regards" %},
+{{ site_team }}
+- {{ site_name }} -
+
+  {% block disclaimer %}
+  {% endblock disclaimer %}
+{% endblock footer %}

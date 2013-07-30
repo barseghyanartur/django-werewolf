@@ -1,0 +1,21 @@
+syntax: regexp
+\.pyc$
+\.hgignore~
+\.gitignore~
+\.git/
+
+^example/media/cache/
+^example/static/
+^example/db/
+^example/tmp/
+^build/
+^builddocs/
+^builddocs.zip
+^example-builddocs/
+^dist/
+^src/django_werewolf.egg-info
+^todos.rst
+
+local_settings\.py
+
+^src/werewolf/models/fields.py

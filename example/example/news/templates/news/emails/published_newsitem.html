@@ -1,0 +1,17 @@
+{% extends 'emails/base.html' %}
+
+{% load i18n %}
+
+{% block html_begin %}{% endblock html_begin %}
+
+{% block email_content %}
+    {% blocktrans with date_submitted as date_submitted and url as url and front_url as front_url and from_name as from_name and message as message %}
+        <p>
+            A News Item has been published by {{ from_name }} on {{ date_submitted }}.
+            See <a href="http://{{ domain }}{{ url }}">admin URL</a> or
+            <a href="http://{{ domain }}{{ front_url }}">front-end URL</a>.
+        </p>
+    {% endblocktrans %}
+{% endblock email_content %}
+
+{% block html_end %}{% endblock html_end %}

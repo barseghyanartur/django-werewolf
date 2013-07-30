@@ -1,0 +1,67 @@
+{% load i18n staticfiles %}
+
+{% block html_begin %}
+<html>
+<body leftmargin="0" marginwidth="0" topmargin="0" marginheight="0" offset="0" bgcolor='#FFFFFF' >
+{% endblock html_begin %}
+
+<style type="text/css">
+ a { color:#0069AE; color:#0069AE; color:#0069AE; }
+ p { margin:0; padding:0; }
+</style>
+
+<table width="100%" cellpadding="0" cellspacing="0" class="backgroundTable" bgcolor='#FFFFFF'>
+	<tr>
+		<td><img src="http://{{ domain }}{% static site_logo %}" alt="{{ site_name }}" /></td>
+	</tr>
+	<tr><td style="padding:0;min-height:8px;font-size:8px" colspan="2">&nbsp;</td></tr>
+	<tr>
+		<td valign="top" colspan="2">
+
+			<table width="550" cellpadding="0" cellspacing="0">
+
+				{% if emailsubject %}
+				<tr style="font-size:13px;color:#000000;line-height:150%;font-family:arial,sans serif;">
+					<td>
+						<strong>{% trans "Subject" %}:</strong> {{ emailsubject }}
+					</td>
+				</tr>
+				{% endif %}
+
+				<tr><td style="padding:0;min-height:8px;font-size:8px" colspan="2">&nbsp;</td></tr>
+				<tr>
+					<td style="font-size:13px;color:#000000;line-height:150%;font-family:arial,sans serif;">
+					    {% block header %}
+						<p>{% blocktrans %}Dear {{ full_name }},{% endblocktrans %}</p>
+					    {% endblock header %}
+					</td>
+				</tr>
+				<tr><td class="content" style="font-size:13px;color:#000000;line-height:150%;font-family:arial,sans serif;">
+						{% block email_content %}{% endblock email_content %}
+					</td>
+				</tr>
+				<tr><td style="padding:0;min-height:8px;font-size:8px" colspan="2">&nbsp;</td></tr>
+				<tr><td style="font-size:13px;color:#000000;line-height:150%;font-family:arial,sans serif;padding:0;">
+					{% block footer %}
+						{% trans "Best regards" %},<br />
+						{{ site_team }}<br />
+						<em>{{ site_name }}</em>
+					{% endblock %}
+					</td>
+				</tr>
+				<tr><td style="padding:0;min-height:8px;font-size:8px" colspan="2">&nbsp;</td></tr>
+				<tr>
+					<td style="font-size:13px;color:#000000;line-height:150%;font-family:arial,sans serif;padding:0;font-size:.8em;">
+					{% block disclaimer %}{% endblock disclaimer %}
+					</td>
+				</tr>
+			</table>
+
+		</td>
+	</tr>
+</table>
+
+{% block html_end %}
+</body>
+</html>
+{% endblock html_end %}
