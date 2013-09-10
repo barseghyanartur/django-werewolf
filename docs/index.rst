@@ -65,8 +65,8 @@ In short, our imaginary app would work as follows.
 
 Automated example installer
 -----------------------------------
-In order to be able to quickly evaluate the django-werewolf, an automated installer demo has been created as
-well (Debian only). Follow the instructions below for having the demo running within a minute.
+In order to be able to quickly evaluate the django-werewolf, an automated installer with a demo has been created
+(Debian only). Follow the instructions below for having the demo running within a minute.
 
 Grab the latest `django-werewolf-example-app-install.sh`
 
@@ -100,7 +100,8 @@ settings.py
 >>>     ('new', gettext('New')), # New - this is how it's assigned to a writer.
 >>>     ('draft', gettext('Draft')), # Draft - this is how the writer works on it.
 >>>     ('ready', gettext('Ready')), # Ready to be reviewed by editor.
->>>     ('reviewed', gettext('Reviewed')), # Reviewed by editor (means positive and ready to be published).
+>>>     ('reviewed', gettext('Reviewed')), # Reviewed by editor (means positive
+>>>                                        # and ready to be published).
 >>>     ('published', gettext('Published')), # Published.
 >>> )
 >>>
@@ -135,9 +136,11 @@ NOTE: See the `Permission tuning` section.
 >>>     body = models.TextField(_("Body"))
 >>>     date_published = models.DateTimeField(_("Date published"), \
 >>>                                           default=datetime.datetime.now())
->>>     author = models.ForeignKey(User, verbose_name=_("Author"), related_name='authors', \
+>>>     author = models.ForeignKey(User, verbose_name=_("Author"), \
+>>>                                related_name='authors', \
 >>>                                limit_choices_to=_writers)
->>>     editor = models.ForeignKey(User, verbose_name=_("Editor"), related_name='editors', \
+>>>     editor = models.ForeignKey(User, verbose_name=_("Editor"), \
+>>>                                related_name='editors', \
 >>>                                limit_choices_to=_editors)
 >>>     chief_editor = models.ForeignKey(User, verbose_name=_("Chief editor"), \
 >>>                                      related_name='chief_editors', \
