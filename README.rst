@@ -32,6 +32,58 @@ For a complete example of a working django-werewolf app see the
 (https://github.com/barseghyanartur/django-werewolf/tree/stable/example) and read the `readme.rst` of the `news`
 app.
 
+Imaginary app concept
+-----------------------------------
+In short, our imaginary wpuld work as follows.
+
+- Chief Editors creates News items and assign those to Writers and Editors.
+- Once a News item has been created, both Writer and the Editor assigned do get an e-mail notification about
+  the fact that a News item has been assigned to them.
+- Writer is supposed to fill the assigned News item with content and once the News item is ready, change
+  its' status to `ready`.
+- The assigned Editor would get an e-mail notification about the fact that the News item has been changed to
+  `ready`.
+- The assigned Editor is supposed to check the News item  with status `ready` and if it's acceptable, change
+  the News item status to `reviewed`.
+- Once a News item status has been set to `reviewed`, the assigned Writer can no longer access it in the admin.
+- The assigned Chief Editor would get an e-mail notification about the fact that the News item has been changed
+  to `reviewed.`
+- The assigned Chief Editor is supposed to check the News item with status `reviewed` and if it acceptable, 
+  change the News item status to `published`.
+- Once a News item status has been set to `published`, the assigned Editor can no longer access it in the admin.
+- Once a News item status has been changed to `published`, all Chief Editors in the system, as well as the
+  assigned Writer and Editor get an e-mail notification about the fact that the News item has been published.
+
+Automated example installer
+-----------------------------------
+In order to be able to quickly evaluate the django-werewolf, an automated installer demo has been created as
+well (Debian only). Follow the instructions below for having the demo running within a minute.
+
+Grab the latest `django-werewolf-example-app-install.sh`
+
+    $ wget https://raw.github.com/barseghyanartur/django-werewolf/stable/django-werewolf-example-app-install.sh
+
+Create a new- or switch to existing- virtual environement, assign execute rights to the installer and run
+the `django-werewolf-example-app-install.sh`.
+
+    $ chmod +x django-werewolf-example-app-install.sh
+
+    $ ./django-werewolf-example-app-install.sh
+
+You can now go to the backend and test the app.
+
+- URL: http://127.0.0.1:8000/admin/news/newsitem/
+- Admin username: admin
+- Password: test
+- Chief Editor username: chief_editor
+- Chief Editor password: test
+- Editor username: editor
+- Editor password: test
+- Writer username: writer
+- Writer password: test
+
+Let's now step-by-step review our imaginary example app.
+
 settings.py
 ----------------------------------
 >>> # Workflow statuses; order is preserved.
