@@ -34,23 +34,32 @@ app.
 
 Imaginary app concept
 -----------------------------------
-In short, our imaginary wpuld work as follows.
+There are three user groups. All of them should be able to log into Django admin.
 
-- Chief Editors creates News items and assign those to Writers and Editors.
-- Once a News item has been created, both Writer and the Editor assigned do get an e-mail notification about
-  the fact that a News item has been assigned to them.
+- Writers
+- Editors
+- Chief Editors
+
+In short, our imaginary app would work as follows.
+
+- Chief Editor creates a News item and chooses a Writer and an Editor. The status of a new News item is
+  then set to `new`.
+- Once a News item with status `new` has been created, both Writer and the Editor assigned do get an e-mail 
+  notification about the fact that a News item has been assigned to them.
 - Writer is supposed to fill the assigned News item with content and once the News item is ready, change
   its' status to `ready`.
 - The assigned Editor would get an e-mail notification about the fact that the News item has been changed to
   `ready`.
 - The assigned Editor is supposed to check the News item  with status `ready` and if it's acceptable, change
   the News item status to `reviewed`.
-- Once a News item status has been set to `reviewed`, the assigned Writer can no longer access it in the admin.
+- Once a News item status has been set to `reviewed`, the assigned Writer can no longer access it in the Django
+  admin.
 - The assigned Chief Editor would get an e-mail notification about the fact that the News item has been changed
   to `reviewed.`
 - The assigned Chief Editor is supposed to check the News item with status `reviewed` and if it acceptable, 
   change the News item status to `published`.
-- Once a News item status has been set to `published`, the assigned Editor can no longer access it in the admin.
+- Once a News item status has been set to `published`, the assigned Editor can no longer access it in the Django
+  admin.
 - Once a News item status has been changed to `published`, all Chief Editors in the system, as well as the
   assigned Writer and Editor get an e-mail notification about the fact that the News item has been published.
 
