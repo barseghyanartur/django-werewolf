@@ -1,3 +1,7 @@
+__title__ = 'werewolf.admin'
+__version__ = '0.2'
+__build__ = 0x000002
+__author__ = 'Artur Barseghyan <artur.barseghyan@gmail.com>'
 __all__ = ('WerewolfBaseAdmin',)
 
 from django.contrib import admin
@@ -8,18 +12,10 @@ from werewolf.triggers import registry
 from werewolf.settings import USE_DJANGO_REVERSION, DEFAULT_STATUS
 
 if USE_DJANGO_REVERSION:
-    import reversion
     from reversion.admin import VersionAdmin
     AdminParentClass = VersionAdmin
-    create_on_success = reversion.revision.create_on_success
 else:
     AdminParentClass = admin.ModelAdmin
-    def create_on_success(func):
-        """
-        A do-nothing replacement if we're not using django-reversion.
-        """
-        return func
-
 
 class WerewolfBaseAdmin(AdminParentClass):
     """

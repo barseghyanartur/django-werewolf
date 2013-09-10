@@ -9,6 +9,7 @@ syntax: regexp
 ^example/db/
 ^example/tmp/
 ^build/
+^example/media/news-images/
 ^builddocs/
 ^builddocs.zip
 ^example-builddocs/

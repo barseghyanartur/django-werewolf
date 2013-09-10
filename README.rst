@@ -6,6 +6,11 @@ Description
 ==================================
 Item publishing workflow for Django (fully integrated into Django admin).
 
+Prerequisites
+===================================
+- Django 1.5.+
+- Python 2.7.+, 3.3.+
+
 Installation
 ==================================
 1. Install django-werewolf into your virtual environment:
@@ -20,11 +25,12 @@ Usage and examples
 ==================================
 It's all about item publishing in a workflow. We have various `intermediate` statuses (work in-progress) and a
 final `status` which means that the item is actually published. Some users should be able to set the item status
-to `published`, some others not. This app allows you (and gives you a good working example with pre-configured django
-environment) to write a custom workflow for publishing your items with minimal efforts.
+to `published`, some others not. This app allows you (and gives you a good working example with pre-configured
+Django environment) to write a custom workflow for publishing your items with minimal efforts.
 
-For a complete example of a working django-werewolf app see the https://bitbucket.org/barseghyanartur/django-werewolf
-(example directory) and read the `readme.rst` of the `news` app.
+For a complete example of a working django-werewolf app see the
+(https://github.com/barseghyanartur/django-werewolf/tree/stable/example) and read the `readme.rst` of the `news`
+app.
 
 settings.py
 ----------------------------------
@@ -45,12 +51,13 @@ settings.py
 
 news/models.py
 ----------------------------------
-In the example below we have a basic news item model. We have Chief Editors with full access to news items, we have
-editors with less privelleges and Writers with very little privelleges. Chief Editors create articles, select an
-Editor and a Writer (both get notified) and let them work on the article. Writers can only set an article status to
-`new`, `draft` and `ready` (ready to be checked). Editors review the articles with status `ready` and set the status
-to `reviewed`. Chief Editors publish articles that are `reviewed`. Your implementation can be as custom as you want
-it. Think in Django user groups (``django.contrib.auth.models.Group``) and Django permissions system.
+In the example below we have a basic news item model. We have Chief Editors with full access to news items, we
+have editors with less privelleges and Writers with very little privelleges. Chief Editors create articles,
+select an Editor and a Writer (both get notified) and let them work on the article. Writers can only set an
+article status to `new`, `draft` and `ready` (ready to be checked). Editors review the articles with status
+`ready` and set the status to `reviewed`. Chief Editors publish articles that are `reviewed`. Your
+implementation can be as custom as you want it. Think in Django user groups (``django.contrib.auth.models.Group``)
+and Django permissions system.
 
 NOTE: See the `Permission tuning` section.
 
@@ -65,17 +72,22 @@ NOTE: See the `Permission tuning` section.
 >>> class NewsItem(WerewolfBaseModel): # Important!
 >>>     title = models.CharField(_("Title"), max_length=100)
 >>>     body = models.TextField(_("Body"))
->>>     date_published = models.DateTimeField(_("Date published"), default=datetime.datetime.now())
->>>     author = models.ForeignKey(User, verbose_name=_("Author"), related_name='authors', limit_choices_to=_writers)
->>>     editor = models.ForeignKey(User, verbose_name=_("Editor"), related_name='editors', limit_choices_to=_editors)
->>>     chief_editor = models.ForeignKey(User, verbose_name=_("Chief editor"), related_name='chief_editors', \
+>>>     date_published = models.DateTimeField(_("Date published"), \
+>>>                                           default=datetime.datetime.now())
+>>>     author = models.ForeignKey(User, verbose_name=_("Author"), related_name='authors', \
+>>>                                limit_choices_to=_writers)
+>>>     editor = models.ForeignKey(User, verbose_name=_("Editor"), related_name='editors', \
+>>>                                limit_choices_to=_editors)
+>>>     chief_editor = models.ForeignKey(User, verbose_name=_("Chief editor"), \
+>>>                                      related_name='chief_editors', \
 >>>                                      limit_choices_to=_chief_editors)
 >>>
 >>>     class Meta(WerewolfBaseMeta): # Important!
 >>>         verbose_name = "News item"
 >>>         verbose_name_plural = "News items"
 
-Or if you want to define custom permissions for your model as well, do extend the werewolf permissions as follows:
+Or if you want to define custom permissions for your model as well, do extend the werewolf permissions as
+follows:
 
 >>> from werewolf.models import WerewolfBaseModel
 >>> from werewolf.utils import extend_werewolf_permissions
@@ -108,10 +120,10 @@ NOTE: See the `Permission tuning` section.
 >>>
 >>> admin.site.register(NewsItem, NewsItemAdmin)
 
-NOTE: If you override the ``queryset`` method of your model's admin class, make sure to see the source code of
-`werewolf.admin.WerewolfBaseAdmin.queryset` and copy the approach from there. Otherwise, your users with no permission
-to change the `published` status will be able to chgange the status of already published items to non-published
-statuses.
+NOTE: If you override the ``queryset`` method of your model's admin class, make sure to see the source code
+of `werewolf.admin.WerewolfBaseAdmin.queryset` and copy the approach from there. Otherwise, your users with
+no permission to change the `published` status will be able to chgange the status of already published items
+to non-published statuses.
 
 news/views.py
 ----------------------------------
@@ -123,9 +135,10 @@ news/views.py
 
 news/werewolf_triggers.py
 ----------------------------------
-In order to perform extra tasks on status change, triggers are used. You simply make a new file in your app called
-`werewolf_triggers.py` and define custom classes that should be called when a ``status`` field of your model changes
-to a certain value. Each trigger should subclass the ``werewolf.triggers.WerewolfBaseTrigger`` class.
+In order to perform extra tasks on status change, triggers are used. You simply make a new file in your app
+called `werewolf_triggers.py` and define custom classes that should be called when a ``status`` field of your
+model changes to a certain value. Each trigger should subclass the ``werewolf.triggers.WerewolfBaseTrigger``
+class.
 
 >>> from werewolf.triggers import WerewolfBaseTrigger, registry
 >>>
@@ -198,18 +211,18 @@ Have in mind our ``news.models.NewsItem`` model.
     - editor: Belongs to group `Editors`.
     - writer: Belongs to group `Writers`.
 
-4. Now log into the admin with different user and see your admin for the `News item` (created items with `chiefeditor`
-   account, then view them with `editor` and `writer`.
+4. Now log into the admin with different user and see your admin for the `News item` (created items with 
+   `chiefeditor` account, then view them with `editor` and `writer`.
 
-That's it. If somehow you don't see the new permissions (`Can change status to draft`, `Can change status to new`, etc)
-run a management command `syncww`:
+That's it. If somehow you don't see the new permissions (`Can change status to draft`,
+`Can change status to new`, etc) run a management command `syncww`:
 
     $ ./manage.py syncww
 
 Running the example project
 ==================================
-A working example of a django-werewolf app is available here: https://bitbucket.org/barseghyanartur/django-werewolf
-(see the `example` directory).
+A working example of a django-werewolf app is available here:
+https://github.com/barseghyanartur/django-werewolf/tree/stable/example
 
 1. Go to example/example directory
 
@@ -232,11 +245,11 @@ A working example of a django-werewolf app is available here: https://bitbucket.
     $ ./manage.py runserver
 
 License
-============
+==================================
 GPL 2.0/LGPL 2.1
 
 Support
-============
+==================================
 For any issues contact me at the e-mail given in the `Author` section.
 
 Author

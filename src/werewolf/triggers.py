@@ -1,3 +1,7 @@
+__title__ = 'werewolf.triggers'
+__version__ = '0.2'
+__build__ = 0x000002
+__author__ = 'Artur Barseghyan <artur.barseghyan@gmail.com>'
 __all__ = ('WerewolfBaseTrigger', 'registry')
 
 class WerewolfBaseTrigger(object):
@@ -10,6 +14,7 @@ class WerewolfBaseTrigger(object):
 
     def process(self):
         raise NotImplementedError("You should define a ``process`` method in your trigger class!")
+
 
 class WerewolfRegistry(object):
     """
@@ -55,11 +60,12 @@ class WerewolfRegistry(object):
         :return werewolf.triggers.WerewolfBaseTrigger: Subclass of ``werewolf.triggers.WerewolfBaseTrigger``.
         """
         key = self.__make_key(app_label, module_name, status)
-        if self._registry.has_key(key):
+        if key in self._registry:
             return self._registry[key]
 
     def get_for_model(self, model, status):
         return self.get(model._meta.app_label, model._meta.module_name, status)
+
 
 # Register triggers by calling registry.register()
 registry = WerewolfRegistry()

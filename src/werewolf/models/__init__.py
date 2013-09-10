@@ -1,3 +1,7 @@
+__title__ = 'werewolf.models.__init__'
+__version__ = '0.2'
+__build__ = 0x000002
+__author__ = 'Artur Barseghyan <artur.barseghyan@gmail.com>'
 __all__ = ('WerewolfBaseMeta', 'WerewolfBaseModel')
 
 from django.db import models
@@ -11,10 +15,10 @@ STATUS_CHOICES = get_setting('STATUS_CHOICES')
 DEFAULT_STATUS = get_setting('DEFAULT_STATUS')
 STATUS_MAX_LENGTH = get_setting('STATUS_MAX_LENGTH')
 
-
 class WerewolfBaseMeta(object):
     """
-    Base Meta class of the ``WerewolfBaseModel``. Every subclass of the ``WerewolfBaseModel`` shall extend it:
+    Base Meta class of the ``WerewolfBaseModel``. Every subclass of the ``WerewolfBaseModel``
+    shall extend it:
     
     >>> from werewolf.models import WerewolfBaseModel, WerewolfBaseMeta
     >>> class NewsItem(WerewolfBaseModel): # Important!
@@ -41,10 +45,11 @@ class WerewolfBaseMeta(object):
 
 class WerewolfBaseModel(models.Model):
     """
-    Base Werewolf model. If you want to have a workflow in your model (for statuses like new, draft, published, etc)
-    you should extend this model.
+    Base Werewolf model. If you want to have a workflow in your model (for statuses like new, draft, 
+    published, etc) you should extend this model.
     """
-    status = models.CharField(_("Status"), max_length=STATUS_MAX_LENGTH, choices=STATUS_CHOICES, default=DEFAULT_STATUS)
+    status = models.CharField(_("Status"), max_length=STATUS_MAX_LENGTH, choices=STATUS_CHOICES, \
+                              default=DEFAULT_STATUS)
 
     objects = WerewolfBaseManager()
 

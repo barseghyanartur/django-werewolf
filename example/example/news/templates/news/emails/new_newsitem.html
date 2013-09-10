@@ -6,7 +6,7 @@
 
 {% block email_content %}
     {% blocktrans with date_submitted as date_submitted and url as url and from_name as from_name and message as message %}
-        <p>A new News Item has been assigned to you by by {{ from_name }} on {{ date_submitted }}. Click <a href="http://{{ domain }}{{ url }}">here</a> to see it.</p>
+        <p>A new News Item has been assigned to you by {{ from_name }} on {{ date_submitted }}. Click <a href="http://{{ domain }}{{ url }}">here</a> to see it.</p>
     {% endblocktrans %}
 {% endblock email_content %}
 

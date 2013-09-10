@@ -15,7 +15,6 @@ from news.constants import PERMISSION_CAN_CHANGE_CHIEF_EDITOR
 
 NEWS_IMAGES_STORAGE_PATH = 'news-images'
 
-
 def _news_images(instance, filename):
     """
     Store the images in their own folder. This allows us to keep thumbnailed versions of all images.
@@ -28,7 +27,6 @@ def _news_images(instance, filename):
 _chief_editors = {'groups__name__iexact': 'Chief editors'}
 _editors = {'groups__name__iexact': 'Editors'}
 _writers = {'groups__name__iexact': 'Writers'}
-
 
 class NewsItem(WerewolfBaseModel):
     """
@@ -127,3 +125,9 @@ class NewsItem(WerewolfBaseModel):
         return self.status
     admin_status.allow_tags = True
     admin_status.short_description = _('Status')
+
+    def get_absolute_url(self):
+        """
+        Given just as an example.
+        """
+        return '/some/path/to/news-item/%s' % self.slug

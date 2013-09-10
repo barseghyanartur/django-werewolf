@@ -10,6 +10,7 @@ example/tmp/
 build/
 builddocs/
 builddocs.zip
+example/media/news-images/
 example-builddocs/
 dist/
 src/django_werewolf.egg-info

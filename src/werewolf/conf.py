@@ -1,3 +1,9 @@
+__title__ = 'werewolf.conf'
+__version__ = '0.2'
+__build__ = 0x000002
+__author__ = 'Artur Barseghyan <artur.barseghyan@gmail.com>'
+__all__ = ('get_setting',)
+
 from django.conf import settings
 
 from werewolf import defaults

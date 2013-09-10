@@ -1,4 +1,9 @@
-__all__ = ('permission_key', 'permissions_for_base_model', 'status_choices_for_user', 'extend_werewolf_permissions')
+__title__ = 'werewolf.utils'
+__version__ = '0.2'
+__build__ = 0x000002
+__author__ = 'Artur Barseghyan <artur.barseghyan@gmail.com>'
+__all__ = ('permission_key', 'permissions_for_base_model', 'status_choices_for_user', \
+           'extend_werewolf_permissions')
 
 from django.utils.translation import ugettext_lazy as _
 
@@ -8,7 +13,6 @@ from werewolf.constants import CHANGE_STATUS_TO #, CAN_VIEW_STATUS
 CHOICES = dict(STATUS_CHOICES)
 
 CHOICES_KEYS = [choice[0] for choice in STATUS_CHOICES]
-
 
 def permission_key(status, choice_key):
     """
@@ -20,18 +24,19 @@ def permission_key(status, choice_key):
     """
     return '%s_%s' % (status, choice_key)
 
-
 def permissions_for_base_model(permissions=[]):
     """
     Gets/extends permissions for the base model based on the ``STATUS_CHOICES`` defined.
 
-    :param list|tuple permissions: Permissions you want to have in your model. Those permissions would be extended
-        by werewolf permissions.
+    :param list|tuple permissions: Permissions you want to have in your model. Those permissions would be
+        extended by werewolf permissions.
     :return list:
     """
     werewolf_permissions = []
     for choice_key in CHOICES_KEYS:
-        werewolf_permissions.append((permission_key(CHANGE_STATUS_TO, choice_key), _("Can change status to %s") % choice_key))
+        werewolf_permissions.append(
+            (permission_key(CHANGE_STATUS_TO, choice_key), _("Can change status to %s") % choice_key)
+            )
         # Not sure if this shall be taken out. This allows viewsing the status. Leave out for now.
         #permissions.append((permission_key(CAN_VIEW_STATUS, choice_key), _("Can view status %s") % choice_key))
 
@@ -42,7 +47,6 @@ def permissions_for_base_model(permissions=[]):
         werewolf_permissions.extend(permissions)
 
     return werewolf_permissions
-
 
 def extend_werewolf_permissions(*args):
     """
@@ -66,15 +70,14 @@ def extend_werewolf_permissions(*args):
     """
     return permissions_for_base_model(args)
 
-
 def status_choices_for_user(user, app_label):
     """
     Gets available status choices for the user given.
 
     :param django.contrib.auth.models.User user: User for who the permissions are checked.
     :param str module_name: `app_label` of the model to check permissions to.
-    :return list: List of choices in a same form as ``werewolf.defaults.STATUS_CHOICES`` but then limited to actual
-        choices that user has permissions to.
+    :return list: List of choices in a same form as ``werewolf.defaults.STATUS_CHOICES`` but then limited
+        to actual choices that user has permissions to.
     """
     statuses = []
     for choice_key in CHOICES_KEYS:
@@ -82,21 +85,3 @@ def status_choices_for_user(user, app_label):
             statuses.append((choice_key, CHOICES[choice_key]))
 
     return statuses
-
-
-def trigger_import(app_label, module_name, status):
-    """
-    Dynamically imports the trigger class for the status change.
-
-    :deprecated: Use ``werewolf.triggers.registry.register`` instead.
-
-    :param str app_label:
-    :param str module_name:
-    :param str status:
-    :return werewolf.triggers.WerewolfBaseTrigger: Subclass of ``werewolf.triggers.WerewolfBaseTrigger``.
-    """
-    try:
-        exec "from %s.werewolf_triggers import Status%s%sTrigger as Trigger" % (app_label, module_name, status.title())
-        return Trigger
-    except:
-        pass

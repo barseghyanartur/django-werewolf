@@ -1,3 +1,9 @@
+__title__ = 'werewolf.management.commands.syncww'
+__version__ = '0.2'
+__build__ = 0x000002
+__author__ = 'Artur Barseghyan <artur.barseghyan@gmail.com>'
+__all__ = ('Command',)
+
 from django.core.management.base import BaseCommand
 from django.db.models import get_models, get_app
 from django.contrib.auth.management import create_permissions
