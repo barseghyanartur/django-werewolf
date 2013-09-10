@@ -8,4 +8,5 @@ python-dateutil==2.1
 pytz==2013b
 six==1.4.1
 South==0.8.2
-django-werewolf==0.2
+#django-werewolf==0.2
+-e git+https://github.com/barseghyanartur/django-werewolf@stable#egg=django-werewolf
