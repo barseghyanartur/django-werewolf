@@ -79,11 +79,11 @@ the `django-werewolf-example-app-install.sh`.
 
     $ ./django-werewolf-example-app-install.sh
 
-You can now go to the backend and test the app.
+Go to the backend and test the app.
 
 - URL: http://127.0.0.1:8000/admin/news/newsitem/
 - Admin username: admin
-- Password: test
+- Admin password: test
 - Chief Editor username: chief_editor
 - Chief Editor password: test
 - Editor username: editor
