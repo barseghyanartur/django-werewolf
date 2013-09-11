@@ -63,9 +63,9 @@ In short, our imaginary app would work as follows.
 - Once a News item status has been changed to `published`, all Chief Editors in the system, as well as the
   assigned Writer and Editor get an e-mail notification about the fact that the News item has been published.
 
-Automated example installer
+Demo
 -----------------------------------
-In order to be able to quickly evaluate the django-werewolf, an automated installer with a demo has been created
+In order to be able to quickly evaluate the django-werewolf, a demo app (with a quick installer) has been created
 (Debian only). Follow the instructions below for having the demo running within a minute.
 
 Grab the latest `django-werewolf-example-app-install.sh`
