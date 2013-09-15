@@ -10,7 +10,7 @@ class WerewolfBaseTrigger(object):
     """
     def __init__(self, obj, request):
         self.obj = obj
-        self.requeset = request
+        self.request = request
 
     def process(self):
         raise NotImplementedError("You should define a ``process`` method in your trigger class!")
