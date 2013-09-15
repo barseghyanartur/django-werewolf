@@ -63,9 +63,9 @@ In short, our imaginary app would work as follows.
 - Once a News item status has been changed to `published`, all Chief Editors in the system, as well as the
   assigned Writer and Editor get an e-mail notification about the fact that the News item has been published.
 
-Automated example installer
+Demo
 -----------------------------------
-In order to be able to quickly evaluate the django-werewolf, an automated installer with a demo has been created
+In order to be able to quickly evaluate the django-werewolf, a demo app (with a quick installer) has been created
 (Debian only). Follow the instructions below for having the demo running within a minute.
 
 Grab the latest `django-werewolf-example-app-install.sh`
@@ -79,11 +79,11 @@ the `django-werewolf-example-app-install.sh`.
 
     $ ./django-werewolf-example-app-install.sh
 
-You can now go to the backend and test the app.
+Go to the backend and test the app.
 
 - URL: http://127.0.0.1:8000/admin/news/newsitem/
 - Admin username: admin
-- Password: test
+- Admin password: test
 - Chief Editor username: chief_editor
 - Chief Editor password: test
 - Editor username: editor
@@ -150,8 +150,8 @@ NOTE: See the `Permission tuning` section.
 >>>         verbose_name = "News item"
 >>>         verbose_name_plural = "News items"
 
-Or if you want to define custom permissions for your model as well, do extend the werewolf permissions as
-follows:
+Or if you want to define custom permissions for your model as well, do extend the django-werewolf
+permissions as follows:
 
 >>> from werewolf.models import WerewolfBaseModel
 >>> from werewolf.utils import extend_werewolf_permissions
@@ -180,9 +180,19 @@ NOTE: See the `Permission tuning` section.
 >>> from news.models import NewsItem
 >>>
 >>> class NewsItemAdmin(WerewolfBaseAdmin):
->>>     # Your code comes here
+>>>     werewolf_protected_fields = (
+>>>         ('author', 'can_change_author'),
+>>>         ('editor', 'can_change_editor'),
+>>>         ('chief_editor', 'can_change_chief_editor')
+>>>     )
 >>>
 >>> admin.site.register(NewsItem, NewsItemAdmin)
+
+The ``werewolf_protected_fields`` property is a list of fields that are supposed to be protected. Each item in
+the list is a tuple of (``field_name_to_protect``, ``required_permission``). If given, django-werewolf hides
+fields listed as protected from users that do not have the permission required. In order to do so, django-werewolf
+overrides the Django's ModelAdmin ``get_field`` and ``get_fieldsets`` methods. If you happen to override that
+method for your own needs, make sure the it also reflects the django-werewolf concepts.
 
 NOTE: If you override the ``queryset`` method of your model's admin class, make sure to see the source code
 of `werewolf.admin.WerewolfBaseAdmin.queryset` and copy the approach from there. Otherwise, your users with

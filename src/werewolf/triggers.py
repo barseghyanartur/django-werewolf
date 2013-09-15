@@ -1,6 +1,6 @@
 __title__ = 'werewolf.triggers'
-__version__ = '0.2'
-__build__ = 0x000002
+__version__ = '0.3'
+__build__ = 0x000003
 __author__ = 'Artur Barseghyan <artur.barseghyan@gmail.com>'
 __all__ = ('WerewolfBaseTrigger', 'registry')
 
