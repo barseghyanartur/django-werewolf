@@ -11,4 +11,5 @@ mkdir ../db/
 cp local_settings.example local_settings.py
 ./manage.py syncdb --noinput --traceback -v 3
 ./manage.py collectstatic --noinput --traceback -v 3
+./manage.py news_create_groups_and_test_users --traceback -v 3
 ./manage.py runserver --traceback -v 3
