@@ -314,7 +314,11 @@ https://github.com/barseghyanartur/django-werewolf/tree/stable/example
 
     $ ./manage.py syncdb
 
-5. Run the project
+5. Insert example test groups and users
+
+    $ ./manage.py news_create_groups_and_test_users
+
+6. Run the project
 
     $ ./manage.py runserver
 
