@@ -12,8 +12,10 @@ from django.db.models import Q
 from news.settings import CHIEF_EDITORS_GROUP_NAME, EDITORS_GROUP_NAME, WRITERS_GROUP_NAME
 
 class Command(BaseCommand):
-    
     def handle(self, *args, **options):
+        # django-reversion group name
+        REVERSION_GROUP_NAME = 'Reversion'
+
         groups = (
             # group name, permissions
             (WRITERS_GROUP_NAME, \
@@ -29,6 +31,8 @@ class Command(BaseCommand):
               'news.newsitem.can_change_chief_editor', 'news.newsitem.change_status_to_new', \
               'news.newsitem.change_status_to_draft', 'news.newsitem.change_status_to_ready', \
               'news.newsitem.change_status_to_reviewed', 'news.newsitem.change_status_to_published']),
+            (REVERSION_GROUP_NAME, \
+             ['reversion.version.add_version', 'reversion.version.change_version', 'reversion.version.delete_version'])
         )
 
         for group_name, group_permissions in groups:
@@ -59,11 +63,11 @@ class Command(BaseCommand):
             # username, password, e-mail, first name, last name
             ('admin', 'test', 'admin@example.com', 'Test Admin', 'Test Admin', []),
             ('chief_editor', 'test', 'chief-editor@example.com', 'Test Chief Editor', 'Test Chief Editor', \
-             [CHIEF_EDITORS_GROUP_NAME]),
+             [CHIEF_EDITORS_GROUP_NAME, REVERSION_GROUP_NAME]),
             ('editor', 'test', 'editor@example.com', 'Test Editor', 'Test Editor', \
-             [EDITORS_GROUP_NAME]),
+             [EDITORS_GROUP_NAME, REVERSION_GROUP_NAME]),
             ('writer', 'test', 'writer@example.com', 'Test Writer', 'Test Writer', \
-             [WRITERS_GROUP_NAME])
+             [WRITERS_GROUP_NAME, REVERSION_GROUP_NAME])
         )
 
         for username, password, email, first_name, last_name, groups in users:
