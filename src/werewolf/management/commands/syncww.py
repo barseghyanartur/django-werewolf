@@ -1,6 +1,6 @@
 __title__ = 'werewolf.management.commands.syncww'
-__version__ = '0.2'
-__build__ = 0x000002
+__version__ = '0.4'
+__build__ = 0x000004
 __author__ = 'Artur Barseghyan <artur.barseghyan@gmail.com>'
 __all__ = ('Command',)
 

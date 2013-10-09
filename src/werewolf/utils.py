@@ -1,6 +1,6 @@
 __title__ = 'werewolf.utils'
-__version__ = '0.3'
-__build__ = 0x000003
+__version__ = '0.4'
+__build__ = 0x000004
 __author__ = 'Artur Barseghyan <artur.barseghyan@gmail.com>'
 __all__ = ('permission_key', 'permissions_for_base_model', 'status_choices_for_user', \
            'extend_werewolf_permissions')

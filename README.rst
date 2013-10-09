@@ -9,7 +9,7 @@ Item publishing workflow for Django (fully integrated into Django admin).
 Prerequisites
 ===================================
 - Django 1.5.+
-- Python 2.7.+, 3.3.+
+- Python 2.6.8+, 2.7.+, 3.3.+
 
 Installation
 ==================================

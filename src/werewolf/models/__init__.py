@@ -1,6 +1,34 @@
+# *****************************************************************************
+# Note, presence of ``WerewolfBaseModel`` and ``WerewolfBaseMeta`` is important!
+#
+# >>> from werewolf.models import WerewolfBaseModel, WerewolfBaseMeta
+# >>> class NewsItem(WerewolfBaseModel):
+# >>>     title = models.CharField(_("Title"), max_length=255)
+# >>>     body = models.TextField(_("Body"))
+# >>>
+# >>>     class Meta(WerewolfBaseMeta):
+# >>>         verbose_name = "News item"
+# >>>         verbose_name_plural = "News items"
+#
+# Alternatively you can add the ``permissions`` attribute:
+#
+# >>> from werewolf.utils import extend_werewolf_permissions
+# >>> class NewsItem(WerewolfBaseModel):
+# >>>     title = models.CharField(_("Title"), max_length=255)
+# >>>     body = models.TextField(_("Body"))
+# >>>
+# >>>     class Meta:
+# >>>         verbose_name = "News item"
+# >>>         verbose_name_plural = "News items"
+# >>>         permissions = extend_werewolf_permissions(
+# >>>             ('can_change_author', _("Can change author")),
+# >>>             ('can_change_editor', _("Can change editor")),
+# >>>         )
+# *****************************************************************************
+
 __title__ = 'werewolf.models.__init__'
-__version__ = '0.3'
-__build__ = 0x000003
+__version__ = '0.4'
+__build__ = 0x000004
 __author__ = 'Artur Barseghyan <artur.barseghyan@gmail.com>'
 __all__ = ('WerewolfBaseMeta', 'WerewolfBaseModel')
 
@@ -18,27 +46,7 @@ STATUS_MAX_LENGTH = get_setting('STATUS_MAX_LENGTH')
 class WerewolfBaseMeta(object):
     """
     Base Meta class of the ``WerewolfBaseModel``. Every subclass of the ``WerewolfBaseModel``
-    shall extend it:
-    
-    >>> from werewolf.models import WerewolfBaseModel, WerewolfBaseMeta
-    >>> class NewsItem(WerewolfBaseModel): # Important!
-    >>>     # Your fields here
-    >>>     class Meta(WerewolfBaseMeta): # Important!
-    >>>         verbose_name = "News item"
-    >>>         verbose_name_plural = "News items"
-
-    Alternatively you can add the ``permissions`` attribute:
-
-    >>> from werewolf.utils import extend_werewolf_permissions
-    >>> class NewsItem(WerewolfBaseModel):
-    >>>     # Your fields here
-    >>>     class Meta:
-    >>>         verbose_name = "News item"
-    >>>         verbose_name_plural = "News items"
-    >>>         permissions = extend_werewolf_permissions(
-    >>>             ('can_change_author', _("Can change author")),
-    >>>             ('can_change_editor', _("Can change editor")),
-    >>>         )
+    shall extend it.
     """
     permissions = extend_werewolf_permissions()
 

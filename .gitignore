@@ -2,6 +2,7 @@
 .hgignore~
 .gitignore~
 .hg/
+.tox/
 
 example/media/cache/
 example/static/

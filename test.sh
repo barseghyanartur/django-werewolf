@@ -1,4 +1,8 @@
+reset
+pip install -r example/requirements.txt
+
 ./uninstall.sh
 ./install.sh
-reset
+
+# Django tests
 python example/example/manage.py test werewolf --traceback -v 3

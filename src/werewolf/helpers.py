@@ -1,6 +1,6 @@
 __title__ = 'werewolf.helpers'
-__version__ = '0.3'
-__build__ = 0x000003
+__version__ = '0.4'
+__build__ = 0x000004
 __author__ = 'Artur Barseghyan <artur.barseghyan@gmail.com>'
 __all__ = ('admin_edit_url', 'admin_edit_url_for_object')
 

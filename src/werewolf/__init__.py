@@ -1,17 +1,15 @@
-__title__ = 'werewolf.views'
-__version__ = '0.3'
-__build__ = 0x000003
+__title__ = 'werewolf.__init__'
+__version__ = '0.4'
+__build__ = 0x000004
 __author__ = 'Artur Barseghyan <artur.barseghyan@gmail.com>'
 __all__ = ('autodiscover',)
 
 import imp
 
-from django.conf import settings
-
 def autodiscover():
     """
-    Autodiscovers the werewolf in project apps. Each report file which should be found by werewolf, should be
-    named "werewolf_triggers.py".
+    Autodiscovers the werewolf triggers in project apps. Each trigger file which should be found by werewolf,
+    should be named "werewolf_triggers.py".
     """
     from django.conf import settings
 
