@@ -313,6 +313,7 @@ if os.environ.get("DJANGO_SETTINGS_MODULE", None):
             # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
             # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
             self.selenium.get('{0}{1}'.format(self.live_server_url, '/admin/news/newsitem/'))
+            self.selenium.maximize_window()
             username_input = self.selenium.find_element_by_name("username")
             username_input.send_keys('chief_editor')
             password_input = self.selenium.find_element_by_name("password")
@@ -410,6 +411,7 @@ if os.environ.get("DJANGO_SETTINGS_MODULE", None):
                 )
 
             self.selenium.get(news_item_href)
+            self.selenium.maximize_window()
             username_input = self.selenium.find_element_by_name("username")
             username_input.send_keys('editor')
             password_input = self.selenium.find_element_by_name("password")
@@ -491,6 +493,7 @@ if os.environ.get("DJANGO_SETTINGS_MODULE", None):
                 )
 
             self.selenium.get(news_item_href)
+            self.selenium.maximize_window()
             username_input = self.selenium.find_element_by_name("username")
             username_input.send_keys('writer')
             password_input = self.selenium.find_element_by_name("password")
@@ -596,6 +599,7 @@ if os.environ.get("DJANGO_SETTINGS_MODULE", None):
                 )
 
             self.selenium.get(news_item_href)
+            self.selenium.maximize_window()
             username_input = self.selenium.find_element_by_name("username")
             username_input.send_keys('editor')
             password_input = self.selenium.find_element_by_name("password")
@@ -642,6 +646,7 @@ if os.environ.get("DJANGO_SETTINGS_MODULE", None):
                 )
 
             self.selenium.get(news_item_href)
+            self.selenium.maximize_window()
             username_input = self.selenium.find_element_by_name("username")
             username_input.send_keys('writer')
             password_input = self.selenium.find_element_by_name("password")
@@ -674,6 +679,7 @@ if os.environ.get("DJANGO_SETTINGS_MODULE", None):
 
             # Logout
             self.selenium.get('{0}{1}'.format(self.live_server_url, '/admin/logout/'))
+            self.selenium.maximize_window()
 
             # Wait until the login view opens
             WebDriverWait(self.selenium, timeout=4).until(
@@ -681,6 +687,7 @@ if os.environ.get("DJANGO_SETTINGS_MODULE", None):
                 )
 
             self.selenium.get(news_item_href)
+            self.selenium.maximize_window()
             username_input = self.selenium.find_element_by_name("username")
             username_input.send_keys('chief_editor')
             password_input = self.selenium.find_element_by_name("password")
@@ -727,6 +734,7 @@ if os.environ.get("DJANGO_SETTINGS_MODULE", None):
                 )
 
             self.selenium.get(news_item_href)
+            self.selenium.maximize_window()
             username_input = self.selenium.find_element_by_name("username")
             username_input.send_keys('writer')
             password_input = self.selenium.find_element_by_name("password")
@@ -759,6 +767,7 @@ if os.environ.get("DJANGO_SETTINGS_MODULE", None):
 
             # Logout
             self.selenium.get('{0}{1}'.format(self.live_server_url, '/admin/logout/'))
+            self.selenium.maximize_window()
 
             # Wait until the login view opens
             WebDriverWait(self.selenium, timeout=4).until(
@@ -766,6 +775,7 @@ if os.environ.get("DJANGO_SETTINGS_MODULE", None):
                 )
 
             self.selenium.get(news_item_href)
+            self.selenium.maximize_window()
             username_input = self.selenium.find_element_by_name("username")
             username_input.send_keys('editor')
             password_input = self.selenium.find_element_by_name("password")
