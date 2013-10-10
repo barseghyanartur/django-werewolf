@@ -8,6 +8,35 @@ __author__ = 'Artur Barseghyan <artur.barseghyan@gmail.com>'
 import unittest
 import os
 
+import random
+
+from six import PY2, PY3
+from six.moves import range
+
+if PY2:
+    from string import translate, maketrans, punctuation
+else:
+    from string import punctuation
+
+import radar
+
+from django.db.models import get_models, get_app
+from django.contrib.auth.management import create_permissions
+from django.contrib.auth.models import User, Group, Permission
+from django.db.models import Q
+from django.conf import settings
+from django.utils.text import slugify
+from django.contrib.auth.models import User
+from django.contrib.contenttypes.models import ContentType
+from django.db import models
+from django.test import LiveServerTestCase
+from django.contrib.auth.models import User
+
+from selenium.webdriver.firefox.webdriver import WebDriver
+from selenium.webdriver.support.wait import WebDriverWait
+
+from werewolf.settings import STATUS_CHOICES
+
 PROJECT_DIR = lambda base : os.path.join(os.path.dirname(__file__), base).replace('\\','/')
 
 PRINT_INFO = True
@@ -37,25 +66,6 @@ def print_info(func):
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-import random
-
-from six import PY2, PY3
-from six import print_
-from six.moves import range
-
-if PY2:
-    from string import translate, maketrans, punctuation
-else:
-    from string import punctuation
-
-import radar
-
-from django.conf import settings
-from django.utils.text import slugify
-from django.contrib.auth.models import User
-from django.contrib.contenttypes.models import ContentType
-from django.db import models
 
 FACTORY = """
     Sed dictum in tellus non iaculis. Aenean ac interdum ipsum. Etiam tempor quis ante vel rhoncus. Nulla
@@ -152,10 +162,6 @@ _ = lambda s: s
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-from django.db.models import get_models, get_app
-from django.contrib.auth.management import create_permissions
-from django.contrib.auth.models import User, Group, Permission
-from django.db.models import Q
 
 def create_groups_and_test_users(chief_editors_group_name, editors_group_name, writers_group_name):
     # django-reversion group name
@@ -237,565 +243,572 @@ def create_groups_and_test_users(chief_editors_group_name, editors_group_name, w
         except Exception as e:
             pass
 
-
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-# Skipping from non-Django tests.
-if os.environ.get("DJANGO_SETTINGS_MODULE", None):
-    CHIEF_EDITORS_GROUP_NAME = 'Chief editors'
+CHIEF_EDITORS_GROUP_NAME = 'Chief editors'
 
-    EDITORS_GROUP_NAME = 'Editors'
+EDITORS_GROUP_NAME = 'Editors'
 
-    WRITERS_GROUP_NAME = 'Writers'
+WRITERS_GROUP_NAME = 'Writers'
 
-    from django.test import LiveServerTestCase
-    from django.contrib.auth.models import User
+class WerewolfTest(LiveServerTestCase): #unittest.TestCase
+    """
+    Tests of ``werewolf`` package. Since `django-werewolf` is does not have
+    own views, but serves rather as a helper to build item publishing workflow.
 
-    from selenium.webdriver.firefox.webdriver import WebDriver
-    from selenium.webdriver.support.wait import WebDriverWait
+    - Chief Editor creates a News item and chooses a Writer and an Editor. The status of a new News item is
+      then set to `new`.
+    - Once a News item with status `new` has been created, both Writer and the Editor assigned do get an e-mail
+      notification about the fact that a News item has been assigned to them.
+    - Writer is supposed to fill the assigned News item with content and once the News item is ready, change
+      its' status to `ready`.
+    - The assigned Editor would get an e-mail notification about the fact that the News item has been changed to
+      `ready`.
+    - The assigned Editor is supposed to check the News item  with status `ready` and if it's acceptable, change
+      the News item status to `reviewed`.
+    - Once a News item status has been set to `reviewed`, the assigned Writer can no longer access it in the Django
+      admin.
+    - The assigned Chief Editor would get an e-mail notification about the fact that the News item has been changed
+      to `reviewed.`
+    - The assigned Chief Editor is supposed to check the News item with status `reviewed` and if it acceptable,
+      change the News item status to `published`.
+    - Once a News item status has been set to `published`, the assigned Editor can no longer access it in the Django
+      admin.
+    - Once a News item status has been changed to `published`, all Chief Editors in the system, as well as the
+      assigned Writer and Editor get an e-mail notification about the fact that the News item has been published.
+    """
+    @classmethod
+    def setUpClass(cls):
+        cls.selenium = WebDriver()
+        super(WerewolfTest, cls).setUpClass()
 
-    from werewolf.settings import STATUS_CHOICES
+        # Create groups and test users
+        try:
+            create_groups_and_test_users(
+                chief_editors_group_name = CHIEF_EDITORS_GROUP_NAME,
+                editors_group_name = EDITORS_GROUP_NAME,
+                writers_group_name = WRITERS_GROUP_NAME
+                )
+        except Exception as e:
+            print(e)
 
-    class WerewolfTest(LiveServerTestCase): #unittest.TestCase
+    @classmethod
+    def tearDownClass(cls):
+        try:
+            cls.selenium.quit()
+        except Exception as e:
+            print(e)
+
+        super(WerewolfTest, cls).tearDownClass()
+
+    @print_info
+    def test_01_test_workflow(self):
         """
-        Tests of ``werewolf`` package. Since `django-werewolf` is does not have
-        own views, but serves rather as a helper to build item publishing workflow,
-        
+        Add news item workflow.
         """
+        workflow = []
 
-        @classmethod
-        def setUpClass(cls):
-            cls.selenium = WebDriver()
-            super(WerewolfTest, cls).setUpClass()
+        author = User._default_manager.get(username='writer')
+        workflow.append(author)
 
-            # Create groups and test users
-            try:
-                create_groups_and_test_users(
-                    chief_editors_group_name = CHIEF_EDITORS_GROUP_NAME,
-                    editors_group_name = EDITORS_GROUP_NAME,
-                    writers_group_name = WRITERS_GROUP_NAME
-                    )
-            except Exception as e:
-                print(e)
+        editor = User._default_manager.get(username='editor')
+        workflow.append(editor)
 
-        @classmethod
-        def tearDownClass(cls):
-            try:
-                cls.selenium.quit()
-            except Exception as e:
-                print(e)
+        chief_editor = User._default_manager.get(username='chief_editor')
+        workflow.append(chief_editor)
 
-            super(WerewolfTest, cls).tearDownClass()
+        # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        # +++++++++++++ Step 1: Chief editor logs in ++++++++++++++++++++
+        # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        self.selenium.get('{0}{1}'.format(self.live_server_url, '/admin/news/newsitem/'))
+        self.selenium.maximize_window()
+        username_input = self.selenium.find_element_by_name("username")
+        username_input.send_keys('chief_editor')
+        password_input = self.selenium.find_element_by_name("password")
+        password_input.send_keys('test')
+        self.selenium.find_element_by_xpath('//input[@value="Log in"]').click()
 
-        @print_info
-        def test_01_test_workflow(self):
-            """
-            Add news item workflow.
-            """
-            workflow = []
+        # Wait until the list view opens
+        WebDriverWait(self.selenium, timeout=4).until(
+            lambda driver: driver.find_element_by_id('changelist')
+            )
 
-            author = User._default_manager.get(username='writer')
-            workflow.append(author)
+        # Click the button to add a new news item
+        self.selenium.find_element_by_xpath('//a[@class="addlink"]').click()
 
-            editor = User._default_manager.get(username='editor')
-            workflow.append(editor)
+        # Wait until the add view opens
+        WebDriverWait(self.selenium, timeout=4).until(
+            lambda driver: driver.find_element_by_id('newsitem_form')
+            )
 
-            chief_editor = User._default_manager.get(username='chief_editor')
-            workflow.append(chief_editor)
+        # Filling the form values
+        title_input = self.selenium.find_element_by_name("title")
+        title_input.send_keys('Lorem ipsum 1')
 
-            # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-            # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-            # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-            # ++++++++++++++++ Chief editor logs in +++++++++++++++++++++++++
-            # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-            # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-            # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-            self.selenium.get('{0}{1}'.format(self.live_server_url, '/admin/news/newsitem/'))
-            self.selenium.maximize_window()
-            username_input = self.selenium.find_element_by_name("username")
-            username_input.send_keys('chief_editor')
-            password_input = self.selenium.find_element_by_name("password")
-            password_input.send_keys('test')
-            self.selenium.find_element_by_xpath('//input[@value="Log in"]').click()
+        slug_input = self.selenium.find_element_by_name("slug")
+        slug_input.send_keys('lorem-ipsum-1')
 
-            # Wait until the list view opens
-            WebDriverWait(self.selenium, timeout=4).until(
-                lambda driver: driver.find_element_by_id('changelist')
+        body_input = self.selenium.find_element_by_name("body")
+        if PY2:
+            body_input.send_keys(unicode(SENTENCES[random.randint(0, len(SENTENCES) - 1)]))
+        else:
+            body_input.send_keys(SENTENCES[random.randint(0, len(SENTENCES) - 1)])
+
+        # For chief editor, `author` field is visible and editable
+        author_input = self.selenium.find_element_by_xpath(
+            '//select[@name="author"]/option[@value="{0}"]'.format(author.pk)
+            )
+        self.assertTrue(author_input is not None)
+        author_input.click()
+
+        # For chief editor, `editor` field is visible and editable
+        editor_input = self.selenium.find_element_by_xpath(
+            '//select[@name="editor"]/option[@value="{0}"]'.format(editor.pk)
+            )
+        self.assertTrue(editor_input is not None)
+        editor_input.click()
+
+        # For chief editor, `chief_editor` field is visible and editable
+        chief_editor_input = self.selenium.find_element_by_xpath(
+            '//select[@name="chief_editor"]/option[@value="{0}"]'.format(chief_editor.pk)
+            )
+        self.assertTrue(chief_editor_input is not None)
+        chief_editor_input.click()
+
+        # For chief editor, `status` field has a full list of all available statuses
+        for status, label in STATUS_CHOICES:
+            status_input = self.selenium.find_element_by_xpath(
+                '//select[@name="status"]/option[@value="{0}"]'.format(status)
                 )
+            self.assertTrue(status_input is not None)
 
-            # Click the button to add a new news item
-            self.selenium.find_element_by_xpath('//a[@class="addlink"]').click()
+        # Submitting the form (save)
+        self.selenium.find_element_by_xpath('//input[@name="_save"]').click()
 
-            # Wait until the add view opens
-            WebDriverWait(self.selenium, timeout=4).until(
-                lambda driver: driver.find_element_by_id('newsitem_form')
+        # Wait until the list view opens
+        WebDriverWait(self.selenium, timeout=4).until(
+            lambda driver: driver.find_element_by_id('changelist')
+            )
+
+        # Check if really is in the list
+        news_item = self.selenium.find_element_by_xpath('//a[contains(text(),"Lorem ipsum 1")]')
+        news_item_href = news_item.get_attribute('href')
+
+        # Newly inserted news item should be there
+        self.assertTrue(news_item is not None)
+        workflow.append(news_item_href)
+
+        # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        # ++++++++++++++++++ Step 2a: Editor logs in ++++++++++++++++++++
+        # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+        # Now logging out and logging in as an editor. Accessing /news/newsitem/{news_item.pk}/
+        # should be possible. Several fields, such as `chief_editor` shall not be seen/editable.
+        # Values of the `status` field are restricted (no `published` option).
+
+        # Trigger the logout
+        self.selenium.find_element_by_xpath('//a[contains(text(),"Log out")]').click()
+
+        # Wait until the login view opens
+        WebDriverWait(self.selenium, timeout=4).until(
+            lambda driver: driver.find_element_by_xpath('//a[contains(text(),"Log in again")]')
+            )
+
+        self.selenium.get(news_item_href)
+        self.selenium.maximize_window()
+        username_input = self.selenium.find_element_by_name("username")
+        username_input.send_keys('editor')
+        password_input = self.selenium.find_element_by_name("password")
+        password_input.send_keys('test')
+        self.selenium.find_element_by_xpath('//input[@value="Log in"]').click()
+
+        # Wait until the add view opens
+        WebDriverWait(self.selenium, timeout=4).until(
+            lambda driver: driver.find_element_by_id('newsitem_form')
+            )
+
+        # For editor, `author` field is visible and editable
+        author_input = self.selenium.find_element_by_xpath(
+            '//select[@name="author"]/option[@value="{0}"]'.format(author.pk)
+            )
+        self.assertTrue(author_input is not None)
+
+        # For editor, `editor` field is not visible/editable
+        found = False
+        try:
+            self.selenium.find_element_by_xpath('//select[@name="editor"]')
+            found = True
+        except:
+            pass
+
+        if found:
+            raise Exception("Found form element `editor`, while it's not supposed to be visible/editable.")
+
+        # For editor, `chief_editor` field is not visible/editable
+        found = False
+        try:
+            self.selenium.find_element_by_xpath('//select[@name="chief_editor"]')
+            found = True
+        except:
+            pass
+
+        if found:
+            raise Exception("Found form element `chief_editor`, while it's not supposed to be visible/editable.")
+
+        # For editor, `status` field has a restricted list of choices: 'new', 'draft', 'ready', 'reviewed'
+        for status in ('new', 'draft', 'ready', 'reviewed'):
+            status_input = self.selenium.find_element_by_xpath(
+                '//select[@name="status"]/option[@value="{0}"]'.format(status)
                 )
+            self.assertTrue(status_input is not None)
 
-            # Filling the form values
-            title_input = self.selenium.find_element_by_name("title")
-            title_input.send_keys('Lorem ipsum 1')
-
-            slug_input = self.selenium.find_element_by_name("slug")
-            slug_input.send_keys('lorem-ipsum-1')
-
-            body_input = self.selenium.find_element_by_name("body")
-            if PY2:
-                body_input.send_keys(unicode(SENTENCES[random.randint(0, len(SENTENCES) - 1)]))
-            else:
-                body_input.send_keys(SENTENCES[random.randint(0, len(SENTENCES) - 1)])
-
-            # For chief editor, `author` field is visible and editable
-            author_input = self.selenium.find_element_by_xpath(
-                '//select[@name="author"]/option[@value="{0}"]'.format(author.pk)
-                )
-            self.assertTrue(author_input is not None)
-            author_input.click()
-
-            # For chief editor, `editor` field is visible and editable
-            editor_input = self.selenium.find_element_by_xpath(
-                '//select[@name="editor"]/option[@value="{0}"]'.format(editor.pk)
-                )
-            self.assertTrue(editor_input is not None)
-            editor_input.click()
-
-            # For chief editor, `chief_editor` field is visible and editable
-            chief_editor_input = self.selenium.find_element_by_xpath(
-                '//select[@name="chief_editor"]/option[@value="{0}"]'.format(chief_editor.pk)
-                )
-            self.assertTrue(chief_editor_input is not None)
-            chief_editor_input.click()
-
-            # For chief editor, `status` field has a full list of all available statuses
-            for status, label in STATUS_CHOICES:
-                status_input = self.selenium.find_element_by_xpath(
-                    '//select[@name="status"]/option[@value="{0}"]'.format(status)
-                    )
-                self.assertTrue(status_input is not None)
-
-            # Submitting the form (save)
-            self.selenium.find_element_by_xpath('//input[@name="_save"]').click()
-
-            # Wait until the list view opens
-            WebDriverWait(self.selenium, timeout=4).until(
-                lambda driver: driver.find_element_by_id('changelist')
-                )
-
-            # Check if really is in the list
-            news_item = self.selenium.find_element_by_xpath('//a[contains(text(),"Lorem ipsum 1")]')
-            news_item_href = news_item.get_attribute('href')
-
-            # Newly inserted news item should be there
-            self.assertTrue(news_item is not None)
-            workflow.append(news_item_href)
-
-            # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-            # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-            # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-            # +++++++++++++++++++++ Editor logs in ++++++++++++++++++++++++++
-            # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-            # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-            # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-            # Now logging out and logging in as an editor. Accessing /news/newsitem/{news_item.pk}/
-            # should be possible. Several fields, such as `chief_editor` shall not be seen/editable.
-            # Values of the `status` field are restricted (no `published` option).
-
-            # Trigger the logout
-            self.selenium.find_element_by_xpath('//a[contains(text(),"Log out")]').click()
-
-            # Wait until the login view opens
-            WebDriverWait(self.selenium, timeout=4).until(
-                lambda driver: driver.find_element_by_xpath('//a[contains(text(),"Log in again")]')
-                )
-
-            self.selenium.get(news_item_href)
-            self.selenium.maximize_window()
-            username_input = self.selenium.find_element_by_name("username")
-            username_input.send_keys('editor')
-            password_input = self.selenium.find_element_by_name("password")
-            password_input.send_keys('test')
-            self.selenium.find_element_by_xpath('//input[@value="Log in"]').click()
-
-            # Wait until the add view opens
-            WebDriverWait(self.selenium, timeout=4).until(
-                lambda driver: driver.find_element_by_id('newsitem_form')
-                )
-
-            # For editor, `author` field is visible and editable
-            author_input = self.selenium.find_element_by_xpath(
-                '//select[@name="author"]/option[@value="{0}"]'.format(author.pk)
-                )
-            self.assertTrue(author_input is not None)
-
-            # For editor, `editor` field is not visible/editable
-            found = False
-            try:
-                self.selenium.find_element_by_xpath('//select[@name="editor"]')
-                found = True
-            except:
-                pass
-
-            if found:
-                raise Exception("Found form element `editor`, while it's not supposed to be visible/editable.")
-
-            # For editor, `chief_editor` field is not visible/editable
-            found = False
-            try:
-                self.selenium.find_element_by_xpath('//select[@name="chief_editor"]')
-                found = True
-            except:
-                pass
-
-            if found:
-                raise Exception("Found form element `chief_editor`, while it's not supposed to be visible/editable.")
-
-            # For editor, `status` field has a restricted list of choices: 'new', 'draft', 'ready', 'reviewed'
-            for status in ('new', 'draft', 'ready', 'reviewed'):
-                status_input = self.selenium.find_element_by_xpath(
-                    '//select[@name="status"]/option[@value="{0}"]'.format(status)
-                    )
-                self.assertTrue(status_input is not None)
-
-            # Editor can't set the `status` to 'published', thus 'publish' shouldn't be available in the list
-            found = False
-            for status in ('published',):
-                try:
-                    self.selenium.find_element_by_xpath(
-                        '//select[@name="status"]/option[@value="{0}"]'.format(status)
-                        )
-                    found = True
-                except:
-                    pass
-
-            if found:
-                raise Exception("Found `status` value 'published', while it's not supposed to be in the list.")
-
-            # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-            # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-            # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-            # +++++++++++++++++++++ Writer logs in ++++++++++++++++++++++++++
-            # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-            # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-            # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-            # Now logging out and logging in as a writer. Accessing /news/newsitem/{news_item.pk}/
-            # should be possible. Several fields, such as `chief_editor` shall not be seen/editable.
-            # Values of the `status` field are restricted (no `published` option).
-
-            # Trigger the logout
-            self.selenium.find_element_by_xpath('//a[contains(text(),"Log out")]').click()
-
-            # Wait until the login view opens
-            WebDriverWait(self.selenium, timeout=4).until(
-                lambda driver: driver.find_element_by_xpath('//a[contains(text(),"Log in again")]')
-                )
-
-            self.selenium.get(news_item_href)
-            self.selenium.maximize_window()
-            username_input = self.selenium.find_element_by_name("username")
-            username_input.send_keys('writer')
-            password_input = self.selenium.find_element_by_name("password")
-            password_input.send_keys('test')
-            self.selenium.find_element_by_xpath('//input[@value="Log in"]').click()
-
-            # Wait until the add view opens
-            WebDriverWait(self.selenium, timeout=4).until(
-                lambda driver: driver.find_element_by_id('newsitem_form')
-                )
-
-            # For writer, `author` field is not visible/editable
-            found = False
+        # Editor can't set the `status` to 'published', thus 'publish' shouldn't be available in the list
+        found = False
+        for status in ('published',):
             try:
                 self.selenium.find_element_by_xpath(
-                    '//select[@name="author"]'
-                    )
-                found = True
-            except:
-                pass
-
-            if found:
-                raise Exception("Found form element `author`, while it's not supposed to be visible/editable.")
-
-            # For writer, `editor` field is not visible/editable
-            found = False
-            try:
-                self.selenium.find_element_by_xpath('//select[@name="editor"]')
-                found = True
-            except:
-                pass
-
-            if found:
-                raise Exception("Found form element `editor`, while it's not supposed to be visible/editable.")
-
-            # For writer, `chief_editor` field is not visible/editable
-            found = False
-            try:
-                self.selenium.find_element_by_xpath('//select[@name="chief_editor"]')
-                found = True
-            except:
-                pass
-
-            if found:
-                raise Exception("Found form element `chief_editor`, while it's not supposed to be visible/editable.")
-
-            # For writer, `status` field has a restricted list of choices: 'new', 'draft', 'ready'
-            for status in ('new', 'draft', 'ready'):
-                status_input = self.selenium.find_element_by_xpath(
                     '//select[@name="status"]/option[@value="{0}"]'.format(status)
                     )
-                self.assertTrue(status_input is not None)
+                found = True
+            except:
+                pass
 
-            # Writer can't set the `status` to 'reviewed' or 'published'
-            found = False
-            for status in ('reviewed', 'published',):
-                try:
-                    self.selenium.find_element_by_xpath(
-                        '//select[@name="status"]/option[@value="{0}"]'.format(status)
-                        )
-                    found = True
-                except:
-                    pass
+        if found:
+            raise Exception("Found `status` value 'published', while it's not supposed to be in the list.")
 
-            if found:
-                raise Exception("Found `status` value 'reviewed' or 'published', "
-                                "while it's not supposed to be in the list.")
+        # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        # +++++++++++++++++ Step 2b: Writer logs in +++++++++++++++++++++
+        # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+        # Now logging out and logging in as a writer. Accessing /news/newsitem/{news_item.pk}/
+        # should be possible. Several fields, such as `chief_editor` shall not be seen/editable.
+        # Values of the `status` field are restricted (no `published` option).
 
-            # Now the writer sets the status to 'ready'
-            status_input = self.selenium.find_element_by_xpath('//select[@name="status"]/option[@value="ready"]')
+        # Trigger the logout
+        self.selenium.find_element_by_xpath('//a[contains(text(),"Log out")]').click()
+
+        # Wait until the login view opens
+        WebDriverWait(self.selenium, timeout=4).until(
+            lambda driver: driver.find_element_by_xpath('//a[contains(text(),"Log in again")]')
+            )
+
+        self.selenium.get(news_item_href)
+        self.selenium.maximize_window()
+        username_input = self.selenium.find_element_by_name("username")
+        username_input.send_keys('writer')
+        password_input = self.selenium.find_element_by_name("password")
+        password_input.send_keys('test')
+        self.selenium.find_element_by_xpath('//input[@value="Log in"]').click()
+
+        # Wait until the add view opens
+        WebDriverWait(self.selenium, timeout=4).until(
+            lambda driver: driver.find_element_by_id('newsitem_form')
+            )
+
+        # For writer, `author` field is not visible/editable
+        found = False
+        try:
+            self.selenium.find_element_by_xpath(
+                '//select[@name="author"]'
+                )
+            found = True
+        except:
+            pass
+
+        if found:
+            raise Exception("Found form element `author`, while it's not supposed to be visible/editable.")
+
+        # For writer, `editor` field is not visible/editable
+        found = False
+        try:
+            self.selenium.find_element_by_xpath('//select[@name="editor"]')
+            found = True
+        except:
+            pass
+
+        if found:
+            raise Exception("Found form element `editor`, while it's not supposed to be visible/editable.")
+
+        # For writer, `chief_editor` field is not visible/editable
+        found = False
+        try:
+            self.selenium.find_element_by_xpath('//select[@name="chief_editor"]')
+            found = True
+        except:
+            pass
+
+        if found:
+            raise Exception("Found form element `chief_editor`, while it's not supposed to be visible/editable.")
+
+        # For writer, `status` field has a restricted list of choices: 'new', 'draft', 'ready'
+        for status in ('new', 'draft', 'ready'):
+            status_input = self.selenium.find_element_by_xpath(
+                '//select[@name="status"]/option[@value="{0}"]'.format(status)
+                )
             self.assertTrue(status_input is not None)
-            status_input.click()
 
-            # Submitting the form (save)
-            self.selenium.find_element_by_xpath('//input[@name="_save"]').click()
+        # Writer can't set the `status` to 'reviewed' or 'published'
+        found = False
+        for status in ('reviewed', 'published',):
+            try:
+                self.selenium.find_element_by_xpath(
+                    '//select[@name="status"]/option[@value="{0}"]'.format(status)
+                    )
+                found = True
+            except:
+                pass
 
-            # Wait until the list view opens
-            WebDriverWait(self.selenium, timeout=4).until(
-                lambda driver: driver.find_element_by_id('changelist')
-                )
+        if found:
+            raise Exception("Found `status` value 'reviewed' or 'published', "
+                            "while it's not supposed to be in the list.")
 
-            # Now log out and login as editor again.
+        # Now the writer sets the status to 'ready'
+        status_input = self.selenium.find_element_by_xpath('//select[@name="status"]/option[@value="ready"]')
+        self.assertTrue(status_input is not None)
+        status_input.click()
 
-            # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-            # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-            # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-            # +++++++++++++++++++++ Editor logs in ++++++++++++++++++++++++++
-            # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-            # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-            # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        # Submitting the form (save)
+        self.selenium.find_element_by_xpath('//input[@name="_save"]').click()
 
-            # Now logging out and logging in as an editor. Accessing /news/newsitem/{news_item.pk}/
-            # should be possible. Several fields, such as `chief_editor` shall not be seen/editable.
-            # Values of the `status` field are restricted (no `published` option).
+        # Wait until the list view opens
+        WebDriverWait(self.selenium, timeout=4).until(
+            lambda driver: driver.find_element_by_id('changelist')
+            )
 
-            # Trigger the logout
-            self.selenium.find_element_by_xpath('//a[contains(text(),"Log out")]').click()
+        # Now log out and login as editor again.
 
-            # Wait until the login view opens
-            WebDriverWait(self.selenium, timeout=4).until(
-                lambda driver: driver.find_element_by_xpath('//a[contains(text(),"Log in again")]')
-                )
+        # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        # ++++++++++++++++ Step 3a: Editor logs in ++++++++++++++++++++++
+        # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-            self.selenium.get(news_item_href)
-            self.selenium.maximize_window()
-            username_input = self.selenium.find_element_by_name("username")
-            username_input.send_keys('editor')
-            password_input = self.selenium.find_element_by_name("password")
-            password_input.send_keys('test')
-            self.selenium.find_element_by_xpath('//input[@value="Log in"]').click()
+        # Now logging out and logging in as an editor. Accessing /news/newsitem/{news_item.pk}/
+        # should be possible. Several fields, such as `chief_editor` shall not be seen/editable.
+        # Values of the `status` field are restricted (no `published` option).
 
-            # Wait until the add view opens
-            WebDriverWait(self.selenium, timeout=4).until(
+        # Trigger the logout
+        self.selenium.find_element_by_xpath('//a[contains(text(),"Log out")]').click()
+
+        # Wait until the login view opens
+        WebDriverWait(self.selenium, timeout=4).until(
+            lambda driver: driver.find_element_by_xpath('//a[contains(text(),"Log in again")]')
+            )
+
+        self.selenium.get(news_item_href)
+        self.selenium.maximize_window()
+        username_input = self.selenium.find_element_by_name("username")
+        username_input.send_keys('editor')
+        password_input = self.selenium.find_element_by_name("password")
+        password_input.send_keys('test')
+        self.selenium.find_element_by_xpath('//input[@value="Log in"]').click()
+
+        # Wait until the add view opens
+        WebDriverWait(self.selenium, timeout=4).until(
+            lambda driver: driver.find_element_by_id('newsitem_form')
+            )
+
+        # Now the editor sets the status to 'reviewed'
+        status_input = self.selenium.find_element_by_xpath('//select[@name="status"]/option[@value="reviewed"]')
+        self.assertTrue(status_input is not None)
+        status_input.click()
+
+        # Submitting the form (save)
+        self.selenium.find_element_by_xpath('//input[@name="_save"]').click()
+
+        # Wait until the list view opens
+        WebDriverWait(self.selenium, timeout=4).until(
+            lambda driver: driver.find_element_by_id('changelist')
+            )
+
+        # Once set to 'reviewed', item shouldn't be visible to writer
+
+        # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        # +++++++++++++++ Step 3b (fail test): Writer logs in +++++++++++
+        # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+        # Now logging out and logging in as a writer. Accessing /news/newsitem/{news_item.pk}/
+        # should no longer be possible.
+
+        # Trigger the logout
+        self.selenium.find_element_by_xpath('//a[contains(text(),"Log out")]').click()
+
+        # Wait until the login view opens
+        WebDriverWait(self.selenium, timeout=4).until(
+            lambda driver: driver.find_element_by_xpath('//a[contains(text(),"Log in again")]')
+            )
+
+        self.selenium.get(news_item_href)
+        self.selenium.maximize_window()
+        username_input = self.selenium.find_element_by_name("username")
+        username_input.send_keys('writer')
+        password_input = self.selenium.find_element_by_name("password")
+        password_input.send_keys('test')
+        self.selenium.find_element_by_xpath('//input[@value="Log in"]').click()
+
+        response = self.client.request()
+
+        try:
+            # Wait until the add view opens - this should not work, since 404 page opens
+            WebDriverWait(self.selenium, timeout=1).until(
                 lambda driver: driver.find_element_by_id('newsitem_form')
                 )
+        except:
+            pass
 
-            # Now the editor sets the status to 'reviewed'
-            status_input = self.selenium.find_element_by_xpath('//select[@name="status"]/option[@value="reviewed"]')
-            self.assertTrue(status_input is not None)
-            status_input.click()
+        # Assuming that 404 raised
+        self.assertTrue(404 == response.status_code)
 
-            # Submitting the form (save)
-            self.selenium.find_element_by_xpath('//input[@name="_save"]').click()
+        # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        # ++++++++++++++++ Step 4a: Chief editor logs in ++++++++++++++++
+        # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-            # Wait until the list view opens
-            WebDriverWait(self.selenium, timeout=4).until(
-                lambda driver: driver.find_element_by_id('changelist')
-                )
+        # Now logging out and logging in as an chief editor. Accessing /news/newsitem/{news_item.pk}/
+        # should be possible.
 
-            # Once set to 'reviewed', item shouldn't be visible to writer
+        # Logout
+        self.selenium.get('{0}{1}'.format(self.live_server_url, '/admin/logout/'))
+        self.selenium.maximize_window()
 
-            # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-            # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-            # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-            # +++++++++++++++++++++ Writer logs in ++++++++++++++++++++++++++
-            # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-            # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-            # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        # Wait until the login view opens
+        WebDriverWait(self.selenium, timeout=4).until(
+            lambda driver: driver.find_element_by_xpath('//a[contains(text(),"Log in again")]')
+            )
 
-            # Now logging out and logging in as a writer. Accessing /news/newsitem/{news_item.pk}/
-            # should no longer be possible.
+        self.selenium.get(news_item_href)
+        self.selenium.maximize_window()
+        username_input = self.selenium.find_element_by_name("username")
+        username_input.send_keys('chief_editor')
+        password_input = self.selenium.find_element_by_name("password")
+        password_input.send_keys('test')
+        self.selenium.find_element_by_xpath('//input[@value="Log in"]').click()
 
-            # Trigger the logout
-            self.selenium.find_element_by_xpath('//a[contains(text(),"Log out")]').click()
+        # Wait until the add view opens
+        WebDriverWait(self.selenium, timeout=4).until(
+            lambda driver: driver.find_element_by_id('newsitem_form')
+            )
 
-            # Wait until the login view opens
-            WebDriverWait(self.selenium, timeout=4).until(
-                lambda driver: driver.find_element_by_xpath('//a[contains(text(),"Log in again")]')
-                )
+        # Now the editor sets the status to 'reviewed'
+        status_input = self.selenium.find_element_by_xpath('//select[@name="status"]/option[@value="published"]')
+        self.assertTrue(status_input is not None)
+        status_input.click()
 
-            self.selenium.get(news_item_href)
-            self.selenium.maximize_window()
-            username_input = self.selenium.find_element_by_name("username")
-            username_input.send_keys('writer')
-            password_input = self.selenium.find_element_by_name("password")
-            password_input.send_keys('test')
-            self.selenium.find_element_by_xpath('//input[@value="Log in"]').click()
+        # Submitting the form (save)
+        self.selenium.find_element_by_xpath('//input[@name="_save"]').click()
 
-            response = self.client.request()
+        # Wait until the list view opens
+        WebDriverWait(self.selenium, timeout=4).until(
+            lambda driver: driver.find_element_by_id('changelist')
+            )
 
-            try:
-                # Wait until the add view opens - this should not work, since 404 page opens
-                WebDriverWait(self.selenium, timeout=1).until(
-                    lambda driver: driver.find_element_by_id('newsitem_form')
-                    )
-            except:
-                pass
+        # Once set to 'published', item shouldn't be visible to editor or writer
 
-            # Assuming that 404 raised
-            self.assertTrue(404 == response.status_code)
+        # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        # +++++++++++++ Step 4b (fail test): Writer logs in +++++++++++++
+        # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-            # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-            # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-            # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-            # +++++++++++++++++++++ Chief editor logs in ++++++++++++++++++++
-            # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-            # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-            # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        # Now logging out and logging in as a writer. Accessing /news/newsitem/{news_item.pk}/
+        # should no longer be possible.
 
-            # Now logging out and logging in as an chief editor. Accessing /news/newsitem/{news_item.pk}/
-            # should be possible.
+        # Trigger the logout
+        self.selenium.find_element_by_xpath('//a[contains(text(),"Log out")]').click()
 
-            # Logout
-            self.selenium.get('{0}{1}'.format(self.live_server_url, '/admin/logout/'))
-            self.selenium.maximize_window()
+        # Wait until the login view opens
+        WebDriverWait(self.selenium, timeout=4).until(
+            lambda driver: driver.find_element_by_xpath('//a[contains(text(),"Log in again")]')
+            )
 
-            # Wait until the login view opens
-            WebDriverWait(self.selenium, timeout=4).until(
-                lambda driver: driver.find_element_by_xpath('//a[contains(text(),"Log in again")]')
-                )
+        self.selenium.get(news_item_href)
+        self.selenium.maximize_window()
+        username_input = self.selenium.find_element_by_name("username")
+        username_input.send_keys('writer')
+        password_input = self.selenium.find_element_by_name("password")
+        password_input.send_keys('test')
+        self.selenium.find_element_by_xpath('//input[@value="Log in"]').click()
 
-            self.selenium.get(news_item_href)
-            self.selenium.maximize_window()
-            username_input = self.selenium.find_element_by_name("username")
-            username_input.send_keys('chief_editor')
-            password_input = self.selenium.find_element_by_name("password")
-            password_input.send_keys('test')
-            self.selenium.find_element_by_xpath('//input[@value="Log in"]').click()
+        response = self.client.request()
 
-            # Wait until the add view opens
-            WebDriverWait(self.selenium, timeout=4).until(
+        try:
+            # Wait until the add view opens - this should not work, since 404 page opens
+            WebDriverWait(self.selenium, timeout=1).until(
                 lambda driver: driver.find_element_by_id('newsitem_form')
                 )
+        except:
+            pass
 
-            # Now the editor sets the status to 'reviewed'
-            status_input = self.selenium.find_element_by_xpath('//select[@name="status"]/option[@value="published"]')
-            self.assertTrue(status_input is not None)
-            status_input.click()
+        # Assuming that 404 raised
+        self.assertTrue(404 == response.status_code)
 
-            # Submitting the form (save)
-            self.selenium.find_element_by_xpath('//input[@name="_save"]').click()
+        # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        # ++++++++++++ Step 4c (fail test): Editor logs in ++++++++++++++
+        # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-            # Wait until the list view opens
-            WebDriverWait(self.selenium, timeout=4).until(
-                lambda driver: driver.find_element_by_id('changelist')
+        # Now logging out and logging in as an editor. Accessing /news/newsitem/{news_item.pk}/
+        # should no longer be possible.
+
+        # Logout
+        self.selenium.get('{0}{1}'.format(self.live_server_url, '/admin/logout/'))
+        self.selenium.maximize_window()
+
+        # Wait until the login view opens
+        WebDriverWait(self.selenium, timeout=4).until(
+            lambda driver: driver.find_element_by_xpath('//a[contains(text(),"Log in again")]')
+            )
+
+        self.selenium.get(news_item_href)
+        self.selenium.maximize_window()
+        username_input = self.selenium.find_element_by_name("username")
+        username_input.send_keys('editor')
+        password_input = self.selenium.find_element_by_name("password")
+        password_input.send_keys('test')
+        self.selenium.find_element_by_xpath('//input[@value="Log in"]').click()
+
+        response = self.client.request()
+
+        try:
+            # Wait until the add view opens - this should not work, since 404 page opens
+            WebDriverWait(self.selenium, timeout=1).until(
+                lambda driver: driver.find_element_by_id('newsitem_form')
                 )
+        except:
+            pass
 
-            # Once set to 'published', item shouldn't be visible to editor or writer
+        # Assuming that 404 raised
+        self.assertTrue(404 == response.status_code)
 
-            # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-            # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-            # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-            # +++++++++++++++++++++ Writer logs in ++++++++++++++++++++++++++
-            # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-            # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-            # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-            # Now logging out and logging in as a writer. Accessing /news/newsitem/{news_item.pk}/
-            # should no longer be possible.
-
-            # Trigger the logout
-            self.selenium.find_element_by_xpath('//a[contains(text(),"Log out")]').click()
-
-            # Wait until the login view opens
-            WebDriverWait(self.selenium, timeout=4).until(
-                lambda driver: driver.find_element_by_xpath('//a[contains(text(),"Log in again")]')
-                )
-
-            self.selenium.get(news_item_href)
-            self.selenium.maximize_window()
-            username_input = self.selenium.find_element_by_name("username")
-            username_input.send_keys('writer')
-            password_input = self.selenium.find_element_by_name("password")
-            password_input.send_keys('test')
-            self.selenium.find_element_by_xpath('//input[@value="Log in"]').click()
-
-            response = self.client.request()
-
-            try:
-                # Wait until the add view opens - this should not work, since 404 page opens
-                WebDriverWait(self.selenium, timeout=1).until(
-                    lambda driver: driver.find_element_by_id('newsitem_form')
-                    )
-            except:
-                pass
-
-            # Assuming that 404 raised
-            self.assertTrue(404 == response.status_code)
-
-            # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-            # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-            # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-            # +++++++++++++++++++++ Editor logs in ++++++++++++++++++++++++++
-            # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-            # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-            # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-            # Now logging out and logging in as an editor. Accessing /news/newsitem/{news_item.pk}/
-            # should no longer be possible.
-
-            # Logout
-            self.selenium.get('{0}{1}'.format(self.live_server_url, '/admin/logout/'))
-            self.selenium.maximize_window()
-
-            # Wait until the login view opens
-            WebDriverWait(self.selenium, timeout=4).until(
-                lambda driver: driver.find_element_by_xpath('//a[contains(text(),"Log in again")]')
-                )
-
-            self.selenium.get(news_item_href)
-            self.selenium.maximize_window()
-            username_input = self.selenium.find_element_by_name("username")
-            username_input.send_keys('editor')
-            password_input = self.selenium.find_element_by_name("password")
-            password_input.send_keys('test')
-            self.selenium.find_element_by_xpath('//input[@value="Log in"]').click()
-
-            response = self.client.request()
-
-            try:
-                # Wait until the add view opens - this should not work, since 404 page opens
-                WebDriverWait(self.selenium, timeout=1).until(
-                    lambda driver: driver.find_element_by_id('newsitem_form')
-                    )
-            except:
-                pass
-
-            # Assuming that 404 raised
-            self.assertTrue(404 == response.status_code)
-
-            return workflow
+        return workflow
 
 
 if __name__ == "__main__":
