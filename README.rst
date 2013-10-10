@@ -81,7 +81,7 @@ the `django-werewolf-example-app-install.sh`.
 
 Go to the backend and test the app.
 
-- URL: http://127.0.0.1:8000/admin/news/newsitem/
+- URL: http://127.0.0.1:8001/admin/news/newsitem/
 - Admin username: admin
 - Admin password: test
 - Chief Editor username: chief_editor
