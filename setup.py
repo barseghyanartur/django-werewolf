@@ -15,7 +15,7 @@ setup(
     long_description = readme,
     classifiers = [
         "Programming Language :: Python",
-        "Programming Language :: Python :: 2.6.8",
+        "Programming Language :: Python :: 2.6",
         "Programming Language :: Python :: 2.7",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.3",
@@ -23,7 +23,7 @@ setup(
         "Framework :: Django",
         "Intended Audience :: Developers",
         "Operating System :: OS Independent",
-        "Development Status :: 5 - Production",
+        "Development Status :: 5 - Production/Stable",
         "License :: OSI Approved :: GNU General Public License v2 (GPLv2)",
         "License :: OSI Approved :: GNU Lesser General Public License v2 or later (LGPLv2+)",
     ],
