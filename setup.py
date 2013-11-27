@@ -30,7 +30,7 @@ setup(
     keywords = 'workflow, publishing, django workflow',
     author = 'Artur Barseghyan',
     author_email = 'artur.barseghyan@gmail.com',
-    url = 'https://bitbucket.org/barseghyanartur/django-werewolf',
+    url = 'https://github.com/barseghyanartur/django-werewolf',
     package_dir = {'':'src'},
     packages = find_packages(where='./src'),
     license = 'GPL 2.0/LGPL 2.1',
