@@ -118,7 +118,7 @@ class WerewolfBaseAdmin(AdminParentClass):
         for your own needs, make sure the it also reflects the django-werewolf concepts.
         """
         fieldsets = super(WerewolfBaseAdmin, self).get_fieldsets(request, obj=None)
-        
+
         if not self.werewolf_protected_fields:
             return fieldsets
 
@@ -126,7 +126,6 @@ class WerewolfBaseAdmin(AdminParentClass):
 
         for fieldset_label, fieldset in fieldsets:
             fields = list(fieldset['fields'])
-
             for field_name, required_permission in self.werewolf_protected_fields:
                 # Cleaning the field that has been already excluded from form (in ``get_form``).
                 if not request.user.has_perm('{0}.{1}'.format(self.model._meta.app_label, required_permission)):
@@ -135,6 +134,10 @@ class WerewolfBaseAdmin(AdminParentClass):
                     except:
                         pass
 
-            cleaned_fieldsets.append((fieldset_label, {'fields': fields}))
+            fieldset_attributes = {
+                'fields': fields,
+                'classes': fieldset.get('classes', list())
+            }
+            cleaned_fieldsets.append((fieldset_label, fieldset_attributes))
 
         return cleaned_fieldsets
