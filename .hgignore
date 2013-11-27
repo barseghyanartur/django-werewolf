@@ -5,6 +5,8 @@ syntax: regexp
 \.git/
 \.tox/
 
+^src/werewolf/base\.py
+^forks/
 ^example/media/cache/
 ^example/static/
 ^example/db/
