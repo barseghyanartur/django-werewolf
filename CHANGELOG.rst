@@ -1,6 +1,11 @@
 =====================================
 Release history
 =====================================
+0.4.2
+-------------------------------------
+2013-11-28
+Added ability to remove fields from the changelist form if permissions are not granted.
+
 0.4.1
 -------------------------------------
 2013-11-27

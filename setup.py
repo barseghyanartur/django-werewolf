@@ -6,7 +6,7 @@ try:
 except:
     readme = ''
 
-version = '0.4.1'
+version = '0.4.2'
 
 setup(
     name = 'django-werewolf',
