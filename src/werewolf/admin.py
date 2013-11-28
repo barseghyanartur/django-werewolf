@@ -111,6 +111,22 @@ class WerewolfBaseAdmin(AdminParentClass):
         defaults.update(kwargs)
         return modelform_factory(self.model, **defaults)
 
+    def get_changelist_formset(self, request, **kwargs):
+        """
+        Removes protected fields from the list_editiable field list.
+        """
+        if self.werewolf_protected_fields:
+            self.list_editable = list(self.list_editable)  # convert to a list so we can 'remove()'
+            for field_name, required_permission in self.werewolf_protected_fields:
+                # Remove field from the list_editable list if permissions are not granted.
+                if not request.user.has_perm('{0}.{1}'.format(self.model._meta.app_label, required_permission)):
+                    try:
+                        self.list_editable.remove(field_name)
+                    except:
+                        pass
+
+        return super(WerewolfBaseAdmin, self).get_changelist_formset(request, **kwargs)
+
     def get_fieldsets(self, request, obj=None):
         """
         Hiding fields that non-authorised users should not have access to. It's done based on the
