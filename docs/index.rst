@@ -9,7 +9,7 @@ Item publishing workflow for Django (fully integrated into Django admin).
 Prerequisites
 ===================================
 - Django 1.5.+
-- Python 2.7.+, 3.3.+
+- Python 2.6.8+, 2.7.+, 3.3.+
 
 Installation
 ==================================
@@ -81,7 +81,7 @@ the `django-werewolf-example-app-install.sh`.
 
 Go to the backend and test the app.
 
-- URL: http://127.0.0.1:8000/admin/news/newsitem/
+- URL: http://127.0.0.1:8001/admin/news/newsitem/
 - Admin username: admin
 - Admin password: test
 - Chief Editor username: chief_editor
@@ -322,6 +322,18 @@ https://github.com/barseghyanartur/django-werewolf/tree/stable/example
 
     $ ./manage.py runserver
 
+License
+==================================
+GPL 2.0/LGPL 2.1
+
+Support
+==================================
+For any issues contact me at the e-mail given in the `Author` section.
+
+Author
+==================================
+Artur Barseghyan <artur.barseghyan@gmail.com>
+
 Documentation
 ==================================
 Contents:
@@ -337,15 +349,3 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
-
-License
-==================================
-GPL 2.0/LGPL 2.1
-
-Support
-==================================
-For any issues contact me at the e-mail given in the `Author` section.
-
-Author
-==================================
-Artur Barseghyan <artur.barseghyan@gmail.com>
