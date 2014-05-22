@@ -23,14 +23,15 @@ That's all. See the `Usage and examples` section for more.
 
 Usage and examples
 ==================================
-It's all about item publishing in a workflow. We have various `intermediate` statuses (work in-progress) and a
-final `status` which means that the item is actually published. Some users should be able to set the item status
-to `published`, some others not. This app allows you (and gives you a good working example with pre-configured
-Django environment) to write a custom workflow for publishing your items with minimal efforts.
+It's all about item publishing in a workflow. We have various `intermediate` statuses (work
+in-progress) and a final `status` which means that the item is actually published. Some users
+should be able to set the item status to `published`, some others not. This app allows
+you (and gives you a good working example with pre-configured Django environment) to write
+a custom workflow for publishing your items with minimal efforts.
 
 For a complete example of a working django-werewolf app see the
-(https://github.com/barseghyanartur/django-werewolf/tree/stable/example) and read the `readme.rst` of the `news`
-app.
+`example <https://github.com/barseghyanartur/django-werewolf/tree/stable/example>`_ and read
+the `README.rst` of the `news` app.
 
 Imaginary app concept
 -----------------------------------
@@ -42,22 +43,22 @@ There are three user groups. All of them should be able to log into Django admin
 
 In short, our imaginary app would work as follows.
 
-- Chief Editor creates a News item and chooses a Writer and an Editor. The status of a new News item is
-  then set to `new`.
-- Once a News item with status `new` has been created, both Writer and the Editor assigned do get an e-mail 
-  notification about the fact that a News item has been assigned to them.
-- Writer is supposed to fill the assigned News item with content and once the News item is ready, change
-  its' status to `ready`.
-- The assigned Editor would get an e-mail notification about the fact that the News item has been changed to
-  `ready`.
-- The assigned Editor is supposed to check the News item  with status `ready` and if it's acceptable, change
-  the News item status to `reviewed`.
-- Once a News item status has been set to `reviewed`, the assigned Writer can no longer access it in the Django
-  admin.
-- The assigned Chief Editor would get an e-mail notification about the fact that the News item has been changed
-  to `reviewed.`
-- The assigned Chief Editor is supposed to check the News item with status `reviewed` and if it acceptable, 
-  change the News item status to `published`.
+- Chief Editor creates a News item and chooses a Writer and an Editor. The status of a new 
+  News item is then set to `new`.
+- Once a News item with status `new` has been created, both Writer and the Editor assigned do 
+  get an e-mail notification about the fact that a News item has been assigned to them.
+- Writer is supposed to fill the assigned News item with content and once the News item is 
+  ready, change its' status to `ready`.
+- The assigned Editor would get an e-mail notification about the fact that the News item has 
+  been changed to `ready`.
+- The assigned Editor is supposed to check the News item  with status `ready` and if it's 
+  acceptable, change the News item status to `reviewed`.
+- Once a News item status has been set to `reviewed`, the assigned Writer can no longer access 
+  it in the Django admin.
+- The assigned Chief Editor would get an e-mail notification about the fact that the News item 
+  has been changed to `reviewed.`
+- The assigned Chief Editor is supposed to check the News item with status `reviewed` and if it
+  acceptable, change the News item status to `published`.
 - Once a News item status has been set to `published`, the assigned Editor can no longer access it in the Django
   admin.
 - Once a News item status has been changed to `published`, all Chief Editors in the system, as well as the
@@ -296,6 +297,7 @@ That's it. If somehow you don't see the new permissions (`Can change status to d
 Running the example project
 ==================================
 A working example of a django-werewolf app is available here:
+
 https://github.com/barseghyanartur/django-werewolf/tree/stable/example
 
 1. Go to example/example directory

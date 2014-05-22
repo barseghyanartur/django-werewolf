@@ -1,7 +1,7 @@
 __title__ = 'werewolf.constants'
-__version__ = '0.4'
-__build__ = 0x000004
 __author__ = 'Artur Barseghyan <artur.barseghyan@gmail.com>'
+__copyright__ = 'Copyright (c) 2013 Artur Barseghyan'
+__license__ = 'GPL 2.0/LGPL 2.1'
 __all__ = ('CHANGE_STATUS_TO', 'CAN_VIEW_STATUS')
 
 # Don't touch this!

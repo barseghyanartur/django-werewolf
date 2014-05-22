@@ -1,7 +1,9 @@
 __title__ = 'werewolf.__init__'
-__version__ = '0.4'
-__build__ = 0x000004
+__version__ = '0.4.3'
+__build__ = 0x000006
 __author__ = 'Artur Barseghyan <artur.barseghyan@gmail.com>'
+__copyright__ = 'Copyright (c) 2013 Artur Barseghyan'
+__license__ = 'GPL 2.0/LGPL 2.1'
 __all__ = ('autodiscover',)
 
 import imp
@@ -25,4 +27,4 @@ def autodiscover():
             imp.find_module(WEREWOLF_TRIGGERS_MODULE_NAME, app_path)
         except ImportError:
             continue
-        __import__('%s.%s' % (app, WEREWOLF_TRIGGERS_MODULE_NAME))
+        __import__('{0}.{1}'.format(app, WEREWOLF_TRIGGERS_MODULE_NAME))

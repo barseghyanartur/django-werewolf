@@ -1,34 +1,25 @@
 from __future__ import print_function
 
 __title__ = 'werewolf.tests'
-__version__ = '0.4'
-__build__ = 0x000004
 __author__ = 'Artur Barseghyan <artur.barseghyan@gmail.com>'
+__copyright__ = 'Copyright (c) 2013 Artur Barseghyan'
+__license__ = 'GPL 2.0/LGPL 2.1'
 
 import unittest
 import os
 
 import random
 
-from six import PY2, PY3
-from six.moves import range
+from six import PY3
 
-if PY2:
-    from string import translate, maketrans, punctuation
-else:
+if PY3:
     from string import punctuation
+else:
+    from string import translate, maketrans, punctuation
 
-import radar
-
-from django.db.models import get_models, get_app
-from django.contrib.auth.management import create_permissions
 from django.contrib.auth.models import User, Group, Permission
 from django.db.models import Q
-from django.conf import settings
-from django.utils.text import slugify
 from django.contrib.auth.models import User
-from django.contrib.contenttypes.models import ContentType
-from django.db import models
 from django.test import LiveServerTestCase
 from django.contrib.auth.models import User
 
@@ -145,10 +136,10 @@ FACTORY = """
     dictum id.
     """
 
-if PY2:
-    split_words = lambda f: list(set(translate(f.lower(), maketrans(punctuation, ' ' * len(punctuation))).split()))
-else:
+if PY3:
     split_words = lambda f: list(set(f.lower().translate(str.maketrans("", "", punctuation)).split()))
+else:
+    split_words = lambda f: list(set(translate(f.lower(), maketrans(punctuation, ' ' * len(punctuation))).split()))
 
 split_sentences = lambda f: f.split('?')
 change_date = lambda: bool(random.randint(0, 1))
@@ -355,10 +346,10 @@ class WerewolfTest(LiveServerTestCase): #unittest.TestCase
         slug_input.send_keys('lorem-ipsum-1')
 
         body_input = self.selenium.find_element_by_name("body")
-        if PY2:
-            body_input.send_keys(unicode(SENTENCES[random.randint(0, len(SENTENCES) - 1)]))
-        else:
+        if PY3:
             body_input.send_keys(SENTENCES[random.randint(0, len(SENTENCES) - 1)])
+        else:
+            body_input.send_keys(unicode(SENTENCES[random.randint(0, len(SENTENCES) - 1)]))
 
         # For chief editor, `author` field is visible and editable
         author_input = self.selenium.find_element_by_xpath(

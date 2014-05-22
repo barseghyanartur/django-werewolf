@@ -5,10 +5,11 @@ Base on MoSCoW principle. Must haves and should haves are planned to be worked o
 
 Must haves
 ------------------------------------
-Customisable workflow per model.
+- Customisable workflow per model.
 
 Should haves
 ------------------------------------
+- FeinCMS integration.
 
 Could haves
 ------------------------------------

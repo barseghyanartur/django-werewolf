@@ -1,7 +1,7 @@
 __title__ = 'werewolf.helpers'
-__version__ = '0.4'
-__build__ = 0x000004
 __author__ = 'Artur Barseghyan <artur.barseghyan@gmail.com>'
+__copyright__ = 'Copyright (c) 2013 Artur Barseghyan'
+__license__ = 'GPL 2.0/LGPL 2.1'
 __all__ = ('admin_edit_url', 'admin_edit_url_for_object')
 
 from django.core.urlresolvers import reverse

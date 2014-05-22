@@ -6,7 +6,7 @@ try:
 except:
     readme = ''
 
-version = '0.4.2'
+version = '0.4.3'
 
 setup(
     name = 'django-werewolf',
@@ -35,7 +35,7 @@ setup(
     packages = find_packages(where='./src'),
     license = 'GPL 2.0/LGPL 2.1',
     install_requires = [
-        'six==1.4.1',
-        'django-reversion==1.7.1'
+        'six>=1.1.0',
+        'django-reversion>=1.7.1'
     ]
 )
