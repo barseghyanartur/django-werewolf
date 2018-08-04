@@ -3,7 +3,7 @@ django-werewolf
 ===============
 **DEPRECATED** 
 
-Use [another](https://djangopackages.org/grids/g/workflow/) workflow app.
+Use `another <https://djangopackages.org/grids/g/workflow/>`_ workflow app.
 
 Description
 ==================================
