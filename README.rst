@@ -1,6 +1,9 @@
-Package
-==================================
+===============
 django-werewolf
+===============
+**DEPRECATED** 
+
+Use [another](https://djangopackages.org/grids/g/workflow/) workflow app.
 
 Description
 ==================================
