@@ -1,4 +1,4 @@
-Django==1.5.4
+Django==1.11.28
 Jinja2==2.7.1
 MarkupSafe==0.18
 Pillow==2.1.0
